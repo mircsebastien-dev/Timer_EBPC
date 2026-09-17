@@ -321,9 +321,14 @@
             }
         }
 
+        // Source audio en cours (pour arrêter le son précédent avant d'en jouer un nouveau)
+        let currentSource = null;
+
         // Lire un buffer .wav à volume maximum
         function playBuffer(buffer) {
             if (!audioContext || !buffer) return;
+            // Arrêter le son précédent pour éviter la superposition
+            stopCurrentSound();
             const source = audioContext.createBufferSource();
             const gainNode = audioContext.createGain();
             source.buffer = buffer;
@@ -331,6 +336,18 @@
             gainNode.connect(audioContext.destination);
             gainNode.gain.value = MAX_VOLUME; // volume à fond
             source.start(0);
+            source.onended = () => {
+                if (currentSource === source) currentSource = null;
+            };
+            currentSource = source;
+        }
+
+        // Arrêter le son en cours
+        function stopCurrentSound() {
+            if (currentSource) {
+                try { currentSource.stop(); } catch (e) {}
+                currentSource = null;
+            }
         }
 
         // Bip pour le compte à rebours (5,4,3,2,1) -> fichier .wav 5s
@@ -388,7 +405,6 @@
                     clearInterval(currentTimer);
                     isBreakTime = false;
                     document.getElementById('status').textContent = "Casse terminée";
-                    playCountdownBeep(); // dernier bip à 0
                     releaseWakeLock();
                 }
             }, 1000);
@@ -431,7 +447,6 @@
                     clearInterval(currentTimer);
                     document.getElementById('status').textContent = "Temps écoulé!";
                     document.getElementById('status').className = "status stopped";
-                    playCountdownBeep(); // dernier bip à 0
                     releaseWakeLock();
                 }
                 // Avertissement à 25s
