@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Timer Blackball</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background-color: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 4px;
+            font-size: 1.3em;
+            color: #e94560;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .logo {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+        }
+        .timer-container {
+            background-color: #16213e;
+            border-radius: 12px;
+            padding: 10px 5px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 6px;
+        }
+        .timer-display {
+            font-size: 7em;
+            font-weight: bold;
+            margin: 0;
+            color: #fff;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
+            letter-spacing: 4px;
+            line-height: 1;
+        }
+        .timer-warning { color: #ffcc00; animation: pulse 1s infinite; }
+        .timer-danger { color: #e94560; animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        .sound-indicator {
+            font-size: 0.85em;
+            margin-top: 1px;
+            color: #aaa;
+        }
+
+        .extensions-info {
+            text-align: center;
+            margin-top: 4px;
+            width: 100%;
+            max-width: 500px;
+            font-size: 0.85em;
+            color: #aaa;
+        }
+
+        .status {
+            margin-top: 4px;
+            font-size: 0.95em;
+            color: #4CAF50;
+            min-height: 18px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .status.paused { color: #ff9800; }
+        .status.stopped { color: #e94560; }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 4px;
+            width: 100%;
+            max-width: 500px;
+            flex: 1;
+        }
+        .control-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button {
+            padding: 12px 6px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 0;
+            min-height: 48px;
+        }
+        button:active { transform: scale(0.98); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-break { background-color: #607d8b; color: white; }
+        .btn-shot { background-color: #2196F3; color: white; }
+        .btn-extension { background-color: #9c27b0; color: white; }
+        .btn-pause { background-color: #ff9800; color: white; }
+        .btn-reset { background-color: #e94560; color: white; }
+
+        .instructions {
+            margin-top: 2px;
+            font-size: 0.8em;
+            color: #aaa;
+            text-align: center;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .extension-used { color: #4CAF50; font-weight: bold; }
+
+        @media (max-width: 400px) {
+            body { padding: 2px; }
+            .timer-display { font-size: 6em; letter-spacing: 3px; }
+            button { padding: 10px 4px; font-size: 0.9em; min-height: 44px; }
+            .header { font-size: 1.2em; gap: 4px; }
+            .logo { width: 128px; height: 128px; }
+            .extensions-info { font-size: 0.8em; }
+            .status { font-size: 0.9em; }
+            .control-row { gap: 8px; }
+            .controls { gap: 8px; margin-top: 2px; }
+            .instructions { margin-top: 1px; font-size: 0.75em; margin-bottom: 2px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.jpg" alt="Logo LOB" class="logo">
+        <div>⏱️ TIMER BLACKBALL</div>
+    </div>
+
+    <div class="timer-container" onclick="unlockAudio()">
+        <div class="timer-display" id="timer">90:00</div>
+        <div class="sound-indicator" id="soundStatus">🔊 Cliquez</div>
+    </div>
+
+    <div class="extensions-info">
+        Extensions: A:<span id="extensionA" class="">Non</span> | B:<span id="extensionB" class="">Non</span>
+    </div>
+
+    <div class="status" id="status">Prêt</div>
+
+    <div class="controls">
+        <div class="control-row">
+            <button class="btn-break" id="btnBreak" onclick="startBreakTimer(); unlockAudio();">⚡ CASSE</button>
+        </div>
+        <div class="control-row">
+            <button class="btn-shot" id="btnShot" onclick="shotPlayed(); unlockAudio();">MAIN EN COURS</button>
+        </div>
+        <div class="control-row">
+            <button class="btn-extension" id="btnExtensionA" onclick="addExtension('A'); unlockAudio();">+30s A</button>
+            <button class="btn-extension" id="btnExtensionB" onclick="addExtension('B'); unlockAudio();">+30s B</button>
+        </div>
+        <div class="control-row">
+            <button class="btn-pause" id="btnPause" onclick="togglePause()">⏸️ PAUSE</button>
+            <button class="btn-reset" id="btnResetAll" onclick="resetAll()">🔄 RÉINIT</button>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <p>1mn30s casse | 45s/coup | ⚠️ Bip 25s + compte à rebours 5-4-3-2-1</p>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentTimer = null;
+        let isPaused = false;
+        let isBreakTime = false;
+        let timeRemaining = 90;
+        let extensionAUsed = false;
+        let extensionBUsed = false;
+        let breakUsed = false;
+        let audioUnlocked = false;
+        let currentExtensionTime = 0;
+        let audioContext = null;
+        let wakeLock = null;
+        let countdownPlayed = false;
+
+        // Buffers audio externes (.wav) chargés à volume maximum
+        let sound25sBuffer = null;   // bip d'avertissement à 25s
+        let sound5sBuffer = null;    // bip du compte à rebours 5-4-3-2-1
+        const SOUND_25S_URL = 'sounds/25s.wav';
+        const SOUND_5S_URL = 'sounds/5s.wav';
+        const MAX_VOLUME = 1.0;      // volume à fond
+
+        // Constantes
+        const SHOT_TIME = 45;
+        const WARNING_TIME = 25;
+        const BREAK_TIME = 90;
+        const EXTENSION_TIME = 30;
+        const COUNTDOWN_START = 5;
+
+        // Empêcher la veille de l'écran
+        function preventSleep() {
+            if ('wakeLock' in navigator) {
+                navigator.wakeLock.request('screen').then((lock) => {
+                    if (wakeLock) wakeLock.release();
+                    wakeLock = lock;
+                }).catch(console.log);
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        // Initialisation de l'API Web Audio
+        function initAudio() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log("Web Audio API not supported:", e);
+                }
+            }
+        }
+
+        // Précharger les fichiers .wav externes en buffers
+        async function preloadSound(url) {
+            try {
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                return await audioContext.decodeAudioData(arrayBuffer);
+            } catch (e) {
+                console.log("Erreur chargement son:", url, e);
+                return null;
+            }
+        }
+
+        async function preloadAllSounds() {
+            initAudio();
+            if (!audioContext) return;
+            sound25sBuffer = await preloadSound(SOUND_25S_URL);
+            sound5sBuffer = await preloadSound(SOUND_5S_URL);
+        }
+
+        // Formater le temps (mm:ss)
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Mettre à jour l'affichage
+        function updateDisplay() {
+            document.getElementById('timer').textContent = formatTime(timeRemaining);
+
+            // Mettre à jour l'affichage des extensions
+            document.getElementById('extensionA').textContent = extensionAUsed ? "Oui" : "Non";
+            document.getElementById('extensionB').textContent = extensionBUsed ? "Oui" : "Non";
+            document.getElementById('extensionA').className = extensionAUsed ? "extension-used" : "";
+            document.getElementById('extensionB').className = extensionBUsed ? "extension-used" : "";
+
+            // Mettre à jour les couleurs du timer
+            const timer = document.getElementById('timer');
+            if (timeRemaining <= WARNING_TIME) {
+                timer.className = 'timer-display timer-warning';
+                if (timeRemaining <= 10) {
+                    timer.className = 'timer-display timer-danger';
+                }
+            } else {
+                timer.className = 'timer-display';
+            }
+
+            // Désactiver les boutons d'extension si déjà utilisés
+            document.getElementById('btnExtensionA').disabled = extensionAUsed;
+            document.getElementById('btnExtensionB').disabled = extensionBUsed;
+            document.getElementById('btnBreak').disabled = breakUsed;
+
+            // Mettre à jour l'icône son
+            if (audioUnlocked) {
+                document.getElementById('soundStatus').innerHTML = "🔊";
+                document.getElementById('soundStatus').style.color = "#4CAF50";
+            } else {
+                document.getElementById('soundStatus').innerHTML = "🔇";
+                document.getElementById('soundStatus').style.color = "#ff5722";
+            }
+        }
+
+        // Déverrouiller l'audio (geste utilisateur requis par les navigateurs)
+        function unlockAudio() {
+            if (audioUnlocked) return;
+            initAudio();
+            if (audioContext) {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                // Son silencieux pour débloquer la lecture
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                gainNode.gain.value = 0;
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.1);
+                audioUnlocked = true;
+                updateDisplay();
+                // Précharger les sons une fois l'audio déverrouillé
+                preloadAllSounds();
+            }
+        }
+
+        // Lire un buffer .wav à volume maximum
+        function playBuffer(buffer) {
+            if (!audioContext || !buffer) return;
+            const source = audioContext.createBufferSource();
+            const gainNode = audioContext.createGain();
+            source.buffer = buffer;
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            gainNode.gain.value = MAX_VOLUME; // volume à fond
+            source.start(0);
+        }
+
+        // Bip pour le compte à rebours (5,4,3,2,1) -> fichier .wav 5s
+        function playCountdownBeep() {
+            if (!audioUnlocked) {
+                unlockAudio();
+                return;
+            }
+            playBuffer(sound5sBuffer);
+        }
+
+        // Bip d'avertissement à 25s -> fichier .wav 25s
+        function playWarning() {
+            if (!audioUnlocked) {
+                unlockAudio();
+                setTimeout(playWarning, 100);
+                return;
+            }
+            playBuffer(sound25sBuffer);
+        }
+
+        // Démarrer le timer de casse
+        function startBreakTimer() {
+            if (breakUsed) return;
+            breakUsed = true;
+            clearInterval(currentTimer);
+            timeRemaining = BREAK_TIME;
+            currentExtensionTime = 0;
+            countdownPlayed = false;
+            isBreakTime = true;
+            isPaused = false;
+            updateDisplay();
+            document.getElementById('status').textContent = "Casse en cours...";
+            document.getElementById('status').className = "status";
+            preventSleep();
+
+            currentTimer = setInterval(() => {
+                if (isPaused) return;
+                timeRemaining--;
+                updateDisplay();
+
+                // Avertissement à 25s
+                if (timeRemaining === WARNING_TIME) {
+                    playWarning();
+                }
+                // Compte à rebours final (5,4,3,2,1)
+                else if (timeRemaining === COUNTDOWN_START && !countdownPlayed) {
+                    playCountdownBeep();
+                    countdownPlayed = true;
+                } else if (countdownPlayed && timeRemaining > 0 && timeRemaining < COUNTDOWN_START) {
+                    playCountdownBeep();
+                }
+
+                if (timeRemaining <= 0) {
+                    clearInterval(currentTimer);
+                    isBreakTime = false;
+                    document.getElementById('status').textContent = "Casse terminée";
+                    playCountdownBeep(); // dernier bip à 0
+                    releaseWakeLock();
+                }
+            }, 1000);
+        }
+
+        // Démarrer une main en cours
+        function shotPlayed() {
+            if (isBreakTime) {
+                clearInterval(currentTimer);
+                isBreakTime = false;
+            }
+            clearInterval(currentTimer);
+
+            // Appliquer les extensions pour cette main
+            timeRemaining = SHOT_TIME + currentExtensionTime;
+            currentExtensionTime = 0;
+            countdownPlayed = false;
+
+            updateDisplay();
+            document.getElementById('status').textContent = "Main en cours";
+            document.getElementById('status').className = "status";
+            preventSleep();
+
+            let warningPlayed = false;
+            currentTimer = setInterval(() => {
+                if (isPaused) return;
+                timeRemaining--;
+                updateDisplay();
+
+                // Compte à rebours final (5,4,3,2,1)
+                if (timeRemaining === COUNTDOWN_START && !countdownPlayed) {
+                    playCountdownBeep();
+                    countdownPlayed = true;
+                } else if (countdownPlayed && timeRemaining > 0 && timeRemaining < COUNTDOWN_START) {
+                    playCountdownBeep();
+                }
+
+                // Fin du timer
+                if (timeRemaining <= 0) {
+                    clearInterval(currentTimer);
+                    document.getElementById('status').textContent = "Temps écoulé!";
+                    document.getElementById('status').className = "status stopped";
+                    playCountdownBeep(); // dernier bip à 0
+                    releaseWakeLock();
+                }
+                // Avertissement à 25s
+                else if (timeRemaining === WARNING_TIME && !warningPlayed) {
+                    playWarning();
+                    warningPlayed = true;
+                }
+            }, 1000);
+        }
+
+        // Ajouter une extension
+        function addExtension(team) {
+            if ((team === 'A' && extensionAUsed) || (team === 'B' && extensionBUsed)) return;
+
+            // Pendant la casse, forcer l'équipe A
+            const actualTeam = isBreakTime ? 'A' : team;
+
+            if (actualTeam === 'A') {
+                extensionAUsed = true;
+            } else {
+                extensionBUsed = true;
+            }
+
+            // Toujours ajouter au timer actuel (casse ou main en cours)
+            timeRemaining += EXTENSION_TIME;
+            updateDisplay();
+
+            document.getElementById('status').textContent = `+30s ${actualTeam}`;
+        }
+
+        // Mettre en pause / reprendre
+        function togglePause() {
+            isPaused = !isPaused;
+            const statusEl = document.getElementById('status');
+            const btnPause = document.getElementById('btnPause');
+
+            if (isPaused) {
+                statusEl.textContent = "PAUSE";
+                statusEl.className = "status paused";
+                btnPause.textContent = "▶️ REPRENDRE";
+                releaseWakeLock();
+            } else {
+                statusEl.textContent = isBreakTime ? "Casse en cours..." : "Main en cours";
+                statusEl.className = "status";
+                btnPause.textContent = "⏸️ PAUSE";
+                preventSleep();
+            }
+        }
+
+        // Réinitialiser tout
+        function resetAll() {
+            clearInterval(currentTimer);
+            releaseWakeLock();
+            timeRemaining = BREAK_TIME;
+            extensionAUsed = false;
+            extensionBUsed = false;
+            currentExtensionTime = 0;
+            isBreakTime = false;
+            isPaused = false;
+            breakUsed = false;
+            countdownPlayed = false;
+            updateDisplay();
+            document.getElementById('status').textContent = "Prêt";
+            document.getElementById('status').className = "status";
+            document.getElementById('btnPause').textContent = "⏸️ PAUSE";
+        }
+
+        // Initialisation
+        initAudio();
+        updateDisplay();
+        window.addEventListener('beforeunload', releaseWakeLock);
+    </script>
+</body>
+</html>
