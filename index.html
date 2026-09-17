@@ -199,7 +199,6 @@
         let currentTimer = null;
         let isPaused = false;
         let isBreakTime = false;
-        let timeRemaining = BREAK_TIME;
         let extensionAUsed = false;
         let extensionBUsed = false;
         let breakUsed = false;
@@ -239,8 +238,8 @@
         const EXTENSION_TIME = 30;
         const COUNTDOWN_START = settings.countdownStart;
 
-        // Appliquer la durée de casse à l'affichage initial
-
+        // timeRemaining initial aligné sur la durée de casse
+        let timeRemaining = BREAK_TIME;
 
         // Empêcher la veille de l'écran
         function preventSleep() {
