@@ -393,12 +393,10 @@
                 if (timeRemaining === WARNING_TIME) {
                     playWarning();
                 }
-                // Compte à rebours final (5,4,3,2,1)
+                // Compte à rebours final (6,5,4,3,2,1 + buzzer) : fichier unique joué une seule fois à 6s
                 else if (timeRemaining === COUNTDOWN_START && !countdownPlayed) {
                     playCountdownBeep();
                     countdownPlayed = true;
-                } else if (countdownPlayed && timeRemaining > 0 && timeRemaining < COUNTDOWN_START) {
-                    playCountdownBeep();
                 }
 
                 if (timeRemaining <= 0) {
@@ -434,12 +432,10 @@
                 timeRemaining--;
                 updateDisplay();
 
-                // Compte à rebours final (5,4,3,2,1)
+                // Compte à rebours final (6,5,4,3,2,1 + buzzer) : fichier unique joué une seule fois à 6s
                 if (timeRemaining === COUNTDOWN_START && !countdownPlayed) {
                     playCountdownBeep();
                     countdownPlayed = true;
-                } else if (countdownPlayed && timeRemaining > 0 && timeRemaining < COUNTDOWN_START) {
-                    playCountdownBeep();
                 }
 
                 // Fin du timer
