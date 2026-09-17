@@ -115,6 +115,7 @@
         .btn-extension { background-color: #9c27b0; color: white; }
         .btn-pause { background-color: #ff9800; color: white; }
         .btn-reset { background-color: #e94560; color: white; }
+        .btn-settings { background-color: #607d8b; color: white; }
 
         .instructions {
             margin-top: 2px;
@@ -126,18 +127,6 @@
         }
 
         .extension-used { color: #4CAF50; font-weight: bold; }
-
-        .settings-link {
-            position: absolute;
-            right: 0;
-            top: 0;
-            font-size: 1.3em;
-            text-decoration: none;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-        .settings-link:hover { opacity: 1; }
-        .header > div:last-child { position: relative; }
 
         @media (max-width: 400px) {
             body { padding: 2px; }
@@ -156,10 +145,7 @@
 <body>
     <div class="header">
         <img src="logo.jpg" alt="Logo LOB" class="logo">
-        <div>
-            <a href="settings.html" class="settings-link" title="Paramètres">⚙️</a>
-            ⏱️ TIMER BLACKBALL
-        </div>
+        <div>⏱️ TIMER BLACKBALL</div>
     </div>
 
     <div class="timer-container" onclick="unlockAudio()">
@@ -187,6 +173,11 @@
         <div class="control-row">
             <button class="btn-pause" id="btnPause" onclick="togglePause()">⏸️ PAUSE</button>
             <button class="btn-reset" id="btnResetAll" onclick="resetAll()">🔄 RÉINIT</button>
+        </div>
+        <div class="control-row">
+            <a href="settings.html" style="flex:1;text-decoration:none;">
+                <button class="btn-settings" style="width:100%;">⚙️ PARAMÈTRES</button>
+            </a>
         </div>
     </div>
 
