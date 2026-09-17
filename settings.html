@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Timer Blackball - Paramètres</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background-color: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 1.3em;
+            color: #e94560;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .header > div:last-child { position: relative; }
+        .logo {
+            width: 128px;
+            height: 128px;
+            object-fit: contain;
+        }
+        .back-link {
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1.3em;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .back-link:hover { opacity: 1; }
+
+        .settings-container {
+            background-color: #16213e;
+            border-radius: 12px;
+            padding: 14px 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 8px;
+        }
+        .setting-group {
+            margin-bottom: 14px;
+        }
+        .setting-group:last-child { margin-bottom: 0; }
+        .setting-label {
+            font-size: 0.95em;
+            font-weight: bold;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .setting-label .value-tag {
+            color: #2196F3;
+            font-size: 0.9em;
+        }
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .slider-row span {
+            font-size: 0.85em;
+            color: #aaa;
+            min-width: 32px;
+            text-align: center;
+        }
+        input[type=range] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #1a1a2e;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2196F3;
+            cursor: pointer;
+            border: none;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2196F3;
+            cursor: pointer;
+            border: none;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 4px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .control-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button {
+            padding: 12px 6px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 0;
+            min-height: 48px;
+        }
+        button:active { transform: scale(0.98); }
+        .btn-test { background-color: #2196F3; color: white; }
+        .btn-test-warn { background-color: #ff9800; color: white; }
+        .btn-save { background-color: #4CAF50; color: white; }
+        .btn-reset { background-color: #e94560; color: white; }
+
+        .status {
+            margin-top: 4px;
+            font-size: 0.95em;
+            color: #4CAF50;
+            min-height: 18px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .info {
+            margin-top: 2px;
+            font-size: 0.8em;
+            color: #aaa;
+            text-align: center;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 400px) {
+            body { padding: 2px; }
+            button { padding: 10px 4px; font-size: 0.9em; min-height: 44px; }
+            .header { font-size: 1.2em; gap: 4px; }
+            .logo { width: 96px; height: 96px; }
+            .control-row { gap: 8px; }
+            .controls { gap: 8px; margin-top: 2px; }
+            .info { font-size: 0.75em; margin-bottom: 2px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.jpg" alt="Logo LOB" class="logo">
+        <div>
+            <a href="index.html" class="back-link" title="Retour">⬅️</a>
+            ⚙️ PARAMÈTRES
+        </div>
+    </div>
+
+    <div class="settings-container">
+        <div class="setting-group">
+            <div class="setting-label">
+                <span>⏱️ Durée main en cours</span>
+                <span class="value-tag" id="shotValue">45 s</span>
+            </div>
+            <div class="slider-row">
+                <span>30s</span>
+                <input type="range" id="shotTime" min="30" max="45" step="1" value="45">
+                <span>45s</span>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <div class="setting-label">
+                <span>⚡ Durée de la casse</span>
+                <span class="value-tag" id="breakValue">90 s</span>
+            </div>
+            <div class="slider-row">
+                <span>45s</span>
+                <input type="range" id="breakTime" min="45" max="90" step="1" value="90">
+                <span>1m30</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="control-row">
+            <button class="btn-test-warn" onclick="testSound('25s')">🔊 Test bip 25s</button>
+            <button class="btn-test" onclick="testSound('5s')">🔊 Test compte à rebours</button>
+        </div>
+        <div class="control-row">
+            <button class="btn-save" onclick="saveSettings()">💾 Enregistrer</button>
+            <button class="btn-reset" onclick="resetSettings()">🔄 Valeurs par défaut</button>
+        </div>
+    </div>
+
+    <div class="status" id="status">Paramètres de session</div>
+
+    <div class="info">
+        <p>Ces paramètres sont valables uniquement pour la session en cours (non définitifs).</p>
+    </div>
+
+    <script>
+        const SOUND_25S_URL = 'sounds/25s.wav';
+        const SOUND_5S_URL = 'sounds/5s.wav';
+        const MAX_VOLUME = 1.0;
+
+        let audioContext = null;
+        let sound25sBuffer = null;
+        let sound5sBuffer = null;
+        let audioUnlocked = false;
+        let currentSource = null;
+
+        function initAudio() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log("Web Audio API not supported:", e);
+                }
+            }
+        }
+
+        async function preloadSound(url) {
+            try {
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                return await audioContext.decodeAudioData(arrayBuffer);
+            } catch (e) {
+                console.log("Erreur chargement son:", url, e);
+                return null;
+            }
+        }
+
+        async function preloadAllSounds() {
+            initAudio();
+            if (!audioContext) return;
+            sound25sBuffer = await preloadSound(SOUND_25S_URL);
+            sound5sBuffer = await preloadSound(SOUND_5S_URL);
+        }
+
+        function unlockAudio() {
+            if (audioUnlocked) return;
+            initAudio();
+            if (audioContext) {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                gainNode.gain.value = 0;
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.1);
+                audioUnlocked = true;
+                preloadAllSounds();
+            }
+        }
+
+        function stopCurrentSound() {
+            if (currentSource) {
+                try { currentSource.stop(); } catch (e) {}
+                currentSource = null;
+            }
+        }
+
+        function playBuffer(buffer) {
+            if (!audioContext || !buffer) return;
+            stopCurrentSound();
+            const source = audioContext.createBufferSource();
+            const gainNode = audioContext.createGain();
+            source.buffer = buffer;
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            gainNode.gain.value = MAX_VOLUME;
+            source.start(0);
+            source.onended = () => {
+                if (currentSource === source) currentSource = null;
+            };
+            currentSource = source;
+        }
+
+        function testSound(which) {
+            unlockAudio();
+            const buffer = which === '25s' ? sound25sBuffer : sound5sBuffer;
+            if (!buffer) {
+                document.getElementById('status').textContent = "Son non chargé, réessayez";
+                return;
+            }
+            playBuffer(buffer);
+            document.getElementById('status').textContent = which === '25s' ? "Lecture du bip 25s..." : "Lecture du compte à rebours...";
+        }
+
+        function saveSettings() {
+            const shotTime = parseInt(document.getElementById('shotTime').value, 10);
+            const breakTime = parseInt(document.getElementById('breakTime').value, 10);
+            const settings = {
+                shotTime: shotTime,
+                breakTime: breakTime,
+                warningTime: 25,
+                countdownStart: 6
+            };
+            sessionStorage.setItem('timerSettings', JSON.stringify(settings));
+            document.getElementById('status').textContent = "Enregistré (session en cours)";
+        }
+
+        function resetSettings() {
+            document.getElementById('shotTime').value = 45;
+            document.getElementById('breakTime').value = 90;
+            updateLabels();
+            sessionStorage.removeItem('timerSettings');
+            document.getElementById('status').textContent = "Valeurs par défaut restaurées";
+        }
+
+        function updateLabels() {
+            const shotTime = parseInt(document.getElementById('shotTime').value, 10);
+            const breakTime = parseInt(document.getElementById('breakTime').value, 10);
+            document.getElementById('shotValue').textContent = shotTime + " s";
+            document.getElementById('breakValue').textContent = breakTime + " s";
+        }
+
+        function loadCurrent() {
+            try {
+                const s = JSON.parse(sessionStorage.getItem('timerSettings') || '{}');
+                if (s.shotTime != null) document.getElementById('shotTime').value = s.shotTime;
+                if (s.breakTime != null) document.getElementById('breakTime').value = s.breakTime;
+            } catch (e) {}
+            updateLabels();
+        }
+
+        document.body.addEventListener('click', unlockAudio, { once: true });
+        document.body.addEventListener('touchstart', unlockAudio, { once: true });
+
+        document.getElementById('shotTime').addEventListener('input', updateLabels);
+        document.getElementById('breakTime').addEventListener('input', updateLabels);
+
+        initAudio();
+        loadCurrent();
+    </script>
+</body>
+</html>

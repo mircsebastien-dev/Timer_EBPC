@@ -127,6 +127,18 @@
 
         .extension-used { color: #4CAF50; font-weight: bold; }
 
+        .settings-link {
+            position: absolute;
+            right: 0;
+            top: 0;
+            font-size: 1.3em;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .settings-link:hover { opacity: 1; }
+        .header > div:last-child { position: relative; }
+
         @media (max-width: 400px) {
             body { padding: 2px; }
             .timer-display { font-size: 6em; letter-spacing: 3px; }
@@ -144,7 +156,10 @@
 <body>
     <div class="header">
         <img src="logo.jpg" alt="Logo LOB" class="logo">
-        <div>⏱️ TIMER BLACKBALL</div>
+        <div>
+            <a href="settings.html" class="settings-link" title="Paramètres">⚙️</a>
+            ⏱️ TIMER BLACKBALL
+        </div>
     </div>
 
     <div class="timer-container" onclick="unlockAudio()">
@@ -184,7 +199,7 @@
         let currentTimer = null;
         let isPaused = false;
         let isBreakTime = false;
-        let timeRemaining = 90;
+        let timeRemaining = BREAK_TIME;
         let extensionAUsed = false;
         let extensionBUsed = false;
         let breakUsed = false;
@@ -202,11 +217,30 @@
         const MAX_VOLUME = 1.0;      // volume à fond
 
         // Constantes
-        const SHOT_TIME = 45;
-        const WARNING_TIME = 25;
-        const BREAK_TIME = 90;
+        // Paramètres de session (modifiables via settings.html, valables le temps de la session)
+        function loadSessionSettings() {
+            try {
+                const s = JSON.parse(sessionStorage.getItem('timerSettings') || '{}');
+                return {
+                    shotTime: s.shotTime != null ? s.shotTime : 45,
+                    breakTime: s.breakTime != null ? s.breakTime : 90,
+                    warningTime: s.warningTime != null ? s.warningTime : 25,
+                    countdownStart: s.countdownStart != null ? s.countdownStart : 6
+                };
+            } catch (e) {
+                return { shotTime: 45, breakTime: 90, warningTime: 25, countdownStart: 6 };
+            }
+        }
+        const settings = loadSessionSettings();
+
+        const SHOT_TIME = settings.shotTime;
+        const WARNING_TIME = settings.warningTime;
+        const BREAK_TIME = settings.breakTime;
         const EXTENSION_TIME = 30;
-        const COUNTDOWN_START = 6;
+        const COUNTDOWN_START = settings.countdownStart;
+
+        // Appliquer la durée de casse à l'affichage initial
+
 
         // Empêcher la veille de l'écran
         function preventSleep() {
