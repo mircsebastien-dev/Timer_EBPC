@@ -218,10 +218,10 @@
                     breakTime: s.breakTime != null ? s.breakTime : 90,
                     warningTime: s.warningTime != null ? s.warningTime : 25,
                     extensionTime: s.extensionTime != null ? s.extensionTime : 30,
-                    countdownStart: s.countdownStart != null ? s.countdownStart : 6
+                    countdownStart: s.countdownStart != null ? s.countdownStart : 5
                 };
             } catch (e) {
-                return { shotTime: 45, breakTime: 90, warningTime: 25, extensionTime: 30, countdownStart: 6 };
+                return { shotTime: 45, breakTime: 90, warningTime: 25, extensionTime: 30, countdownStart: 5 };
             }
         }
         const settings = loadSessionSettings();
