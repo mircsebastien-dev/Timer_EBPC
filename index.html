@@ -428,8 +428,17 @@
         // Reprendre le son de compte à rebours où il s'est arrêté
         function resumeCountdownSound() {
             if (countdownPlaying || !sound5sBuffer) return;
-            if (countdownOffset >= sound5sBuffer.duration) return; // déjà terminé
-            startCountdownSound();
+            if (countdownOffset >= sound5sBuffer.duration) {
+                stopCountdownSound();
+                return;
+            }
+            // Ne reprendre que si on est toujours dans la plage du compte à rebours
+            if (timeRemaining <= COUNTDOWN_START && timeRemaining > 0) {
+                startCountdownSound();
+            } else {
+                // Sinon, arrêter et remettre à zéro (on a dépassé la plage)
+                stopCountdownSound();
+            }
         }
 
         // Arrêter et remettre à zéro le son de compte à rebours (pour pouvoir le relire)
