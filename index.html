@@ -347,10 +347,15 @@
         // Source audio en cours (pour arrêter le son précédent avant d'en jouer un nouveau)
         let currentSource = null;
 
-        // Lire un buffer .wav à volume maximum
+        // État du son de compte à rebours (5s.wav) : supporte pause/reprise + reset
+        let countdownSource = null;
+        let countdownOffset = 0;     // position de lecture dans le buffer (secondes)
+        let countdownStartCtxTime = 0; // instant AudioContext du dernier start
+        let countdownPlaying = false;
+
+        // Lire un buffer .wav à volume maximum (son simple, non pausable)
         function playBuffer(buffer) {
             if (!audioContext || !buffer) return;
-            // Arrêter le son précédent pour éviter la superposition
             stopCurrentSound();
             const source = audioContext.createBufferSource();
             const gainNode = audioContext.createGain();
@@ -365,7 +370,7 @@
             currentSource = source;
         }
 
-        // Arrêter le son en cours
+        // Arrêter le son simple en cours
         function stopCurrentSound() {
             if (currentSource) {
                 try { currentSource.stop(); } catch (e) {}
@@ -373,16 +378,70 @@
             }
         }
 
-        // Bip pour le compte à rebours (5,4,3,2,1) -> fichier .wav 5s
+        // --- Son de compte à rebours (5s.wav) avec pause/reprise/reset ---
+
+        // Déclencher le compte à rebours depuis 0
         function playCountdownBeep() {
             if (!audioUnlocked) {
                 unlockAudio();
                 return;
             }
-            playBuffer(sound5sBuffer);
+            if (!audioContext || !sound5sBuffer) return;
+            stopCountdownSound();
+            countdownOffset = 0;
+            startCountdownSound();
         }
 
-        // Bip d'avertissement à 25s -> fichier .wav 25s
+        // Lancer/relancer la source à partir de countdownOffset
+        function startCountdownSound() {
+            const source = audioContext.createBufferSource();
+            const gainNode = audioContext.createGain();
+            source.buffer = sound5sBuffer;
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            gainNode.gain.value = MAX_VOLUME;
+            countdownStartCtxTime = audioContext.currentTime;
+            source.start(0, countdownOffset);
+            source.onended = () => {
+                if (countdownSource === source) {
+                    countdownSource = null;
+                    countdownPlaying = false;
+                    countdownOffset = 0;
+                }
+            };
+            countdownSource = source;
+            countdownPlaying = true;
+        }
+
+        // Mettre en pause le son de compte à rebours (mémorise la position)
+        function pauseCountdownSound() {
+            if (!countdownPlaying || !countdownSource) return;
+            // Calculer la position actuelle dans le buffer
+            const elapsed = audioContext.currentTime - countdownStartCtxTime;
+            countdownOffset = Math.min(countdownOffset + elapsed, sound5sBuffer.duration);
+            try { countdownSource.stop(); } catch (e) {}
+            countdownSource = null;
+            countdownPlaying = false;
+        }
+
+        // Reprendre le son de compte à rebours où il s'est arrêté
+        function resumeCountdownSound() {
+            if (countdownPlaying || !sound5sBuffer) return;
+            if (countdownOffset >= sound5sBuffer.duration) return; // déjà terminé
+            startCountdownSound();
+        }
+
+        // Arrêter et remettre à zéro le son de compte à rebours (pour pouvoir le relire)
+        function stopCountdownSound() {
+            if (countdownSource) {
+                try { countdownSource.stop(); } catch (e) {}
+                countdownSource = null;
+            }
+            countdownPlaying = false;
+            countdownOffset = 0;
+        }
+
+        // Bip d'avertissement à 25s -> fichier .wav 25s (son simple)
         function playWarning() {
             if (!audioUnlocked) {
                 unlockAudio();
@@ -438,6 +497,8 @@
                 isBreakTime = false;
             }
             clearInterval(currentTimer);
+            // Arrêter et remettre à zéro le compte à rebours sonore
+            stopCountdownSound();
 
             // Appliquer les extensions pour cette main
             timeRemaining = SHOT_TIME + currentExtensionTime;
@@ -491,6 +552,9 @@
 
             // Toujours ajouter au timer actuel (casse ou main en cours)
             timeRemaining += EXTENSION_TIME;
+            // Si le compte à rebours sonore a démarré, l'arrêter et le remettre à zéro pour pouvoir le relire
+            stopCountdownSound();
+            countdownPlayed = false;
             updateDisplay();
 
             document.getElementById('status').textContent = `+30s ${actualTeam}`;
@@ -506,8 +570,10 @@
                 statusEl.textContent = "PAUSE";
                 statusEl.className = "status paused";
                 btnPause.textContent = "▶️ REPRENDRE";
+                pauseCountdownSound();
                 releaseWakeLock();
             } else {
+                resumeCountdownSound();
                 statusEl.textContent = isBreakTime ? "Casse en cours..." : "Main en cours";
                 statusEl.className = "status";
                 btnPause.textContent = "⏸️ PAUSE";
@@ -519,6 +585,8 @@
         function resetAll() {
             clearInterval(currentTimer);
             releaseWakeLock();
+            stopCountdownSound();
+            stopCurrentSound();
             timeRemaining = BREAK_TIME;
             extensionAUsed = false;
             extensionBUsed = false;
