@@ -43,12 +43,12 @@
             margin-bottom: 6px;
         }
         .timer-display {
-            font-size: 7em;
+            font-size: 12em;
             font-weight: bold;
             margin: 0;
             color: #fff;
             text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
-            letter-spacing: 4px;
+            letter-spacing: 2px;
             line-height: 1;
         }
         .timer-warning { color: #ffcc00; animation: pulse 1s infinite; }
@@ -115,7 +115,15 @@
         .btn-extension { background-color: #9c27b0; color: white; }
         .btn-pause { background-color: #ff9800; color: white; }
         .btn-reset { background-color: #e94560; color: white; }
-        .btn-settings { background-color: #607d8b; color: white; }
+
+        .settings-icon {
+            margin-top: 8px;
+            font-size: 1.6em;
+            text-decoration: none;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .settings-icon:active { opacity: 1; }
 
         .instructions {
             margin-top: 2px;
@@ -130,7 +138,7 @@
 
         @media (max-width: 400px) {
             body { padding: 2px; }
-            .timer-display { font-size: 6em; letter-spacing: 3px; }
+            .timer-display { font-size: 9em; letter-spacing: 1px; }
             button { padding: 10px 4px; font-size: 0.9em; min-height: 44px; }
             .header { font-size: 1.2em; gap: 4px; }
             .logo { width: 128px; height: 128px; }
@@ -149,7 +157,7 @@
     </div>
 
     <div class="timer-container" onclick="unlockAudio()">
-        <div class="timer-display" id="timer">90:00</div>
+        <div class="timer-display" id="timer">90</div>
         <div class="sound-indicator" id="soundStatus">🔊 Cliquez</div>
     </div>
 
@@ -174,16 +182,9 @@
             <button class="btn-pause" id="btnPause" onclick="togglePause()">⏸️ PAUSE</button>
             <button class="btn-reset" id="btnResetAll" onclick="resetAll()">🔄 RÉINIT</button>
         </div>
-        <div class="control-row">
-            <a href="settings.html" style="flex:1;text-decoration:none;">
-                <button class="btn-settings" style="width:100%;">⚙️ PARAMÈTRES</button>
-            </a>
-        </div>
     </div>
 
-    <div class="instructions">
-        <p>1mn30s casse | 45s/coup | ⚠️ Bip 25s + compte à rebours 5-4-3-2-1</p>
-    </div>
+    <a href="settings.html" class="settings-icon" title="Paramètres">⚙️</a>
 
     <script>
         // Variables globales
@@ -281,9 +282,7 @@
 
         // Formater le temps (mm:ss)
         function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            return `${seconds.toString().padStart(2, '0')}`;
         }
 
         // Mettre à jour l'affichage
