@@ -162,7 +162,7 @@
     </div>
 
     <div class="extensions-info">
-        Extensions: A:<span id="extensionA" class="">Non</span> | B:<span id="extensionB" class="">Non</span>
+        Extensions: A:<span id="extensionA" class="">Non</span> | B:<span id="extensionB" class="">Non</span> (+<span id="extensionTimeDisplay">30</span>s)
     </div>
 
     <div class="status" id="status">Prêt</div>
@@ -175,8 +175,8 @@
             <button class="btn-shot" id="btnShot" onclick="shotPlayed(); unlockAudio();">MAIN EN COURS</button>
         </div>
         <div class="control-row">
-            <button class="btn-extension" id="btnExtensionA" onclick="addExtension('A'); unlockAudio();">+30s A</button>
-            <button class="btn-extension" id="btnExtensionB" onclick="addExtension('B'); unlockAudio();">+30s B</button>
+            <button class="btn-extension" id="btnExtensionA" onclick="addExtension('A'); unlockAudio();">+EXT A</button>
+            <button class="btn-extension" id="btnExtensionB" onclick="addExtension('B'); unlockAudio();">+EXT B</button>
         </div>
         <div class="control-row">
             <button class="btn-pause" id="btnPause" onclick="togglePause()">⏸️ PAUSE</button>
@@ -217,10 +217,11 @@
                     shotTime: s.shotTime != null ? s.shotTime : 45,
                     breakTime: s.breakTime != null ? s.breakTime : 90,
                     warningTime: s.warningTime != null ? s.warningTime : 25,
+                    extensionTime: s.extensionTime != null ? s.extensionTime : 30,
                     countdownStart: s.countdownStart != null ? s.countdownStart : 6
                 };
             } catch (e) {
-                return { shotTime: 45, breakTime: 90, warningTime: 25, countdownStart: 6 };
+                return { shotTime: 45, breakTime: 90, warningTime: 25, extensionTime: 30, countdownStart: 6 };
             }
         }
         const settings = loadSessionSettings();
@@ -228,7 +229,7 @@
         const SHOT_TIME = settings.shotTime;
         const WARNING_TIME = settings.warningTime;
         const BREAK_TIME = settings.breakTime;
-        const EXTENSION_TIME = 30;
+        const EXTENSION_TIME = settings.extensionTime;
         const COUNTDOWN_START = settings.countdownStart;
 
         // timeRemaining initial aligné sur la durée de casse
@@ -295,6 +296,7 @@
             document.getElementById('extensionB').textContent = extensionBUsed ? "Oui" : "Non";
             document.getElementById('extensionA').className = extensionAUsed ? "extension-used" : "";
             document.getElementById('extensionB').className = extensionBUsed ? "extension-used" : "";
+            document.getElementById('extensionTimeDisplay').textContent = EXTENSION_TIME;
 
             // Mettre à jour les couleurs du timer
             const timer = document.getElementById('timer');

@@ -214,6 +214,18 @@
                 <span>25s</span>
             </div>
         </div>
+
+        <div class="setting-group">
+            <div class="setting-label">
+                <span>\u26a1 Dur\u00e9e des extensions</span>
+                <span class="value-tag" id="extensionValue">30 s</span>
+            </div>
+            <div class="slider-row">
+                <span>10s</span>
+                <input type="range" id="extensionTime" min="10" max="45" step="1" value="30">
+                <span>45s</span>
+            </div>
+        </div>
     </div>
 
     <div class="controls">
@@ -329,10 +341,12 @@
             const shotTime = parseInt(document.getElementById('shotTime').value, 10);
             const breakTime = parseInt(document.getElementById('breakTime').value, 10);
             const warningTime = parseInt(document.getElementById('warningTime').value, 10);
+            const extensionTime = parseInt(document.getElementById('extensionTime').value, 10);
             const settings = {
                 shotTime: shotTime,
                 breakTime: breakTime,
                 warningTime: warningTime,
+                extensionTime: extensionTime,
                 countdownStart: 5
             };
             sessionStorage.setItem('timerSettings', JSON.stringify(settings));
@@ -343,6 +357,7 @@
             document.getElementById('shotTime').value = 45;
             document.getElementById('breakTime').value = 90;
             document.getElementById('warningTime').value = 25;
+            document.getElementById('extensionTime').value = 30;
             updateLabels();
             sessionStorage.removeItem('timerSettings');
             document.getElementById('status').textContent = "Valeurs par défaut restaurées";
@@ -352,9 +367,11 @@
             const shotTime = parseInt(document.getElementById('shotTime').value, 10);
             const breakTime = parseInt(document.getElementById('breakTime').value, 10);
             const warningTime = parseInt(document.getElementById('warningTime').value, 10);
+            const extensionTime = parseInt(document.getElementById('extensionTime').value, 10);
             document.getElementById('shotValue').textContent = shotTime + " s";
             document.getElementById('breakValue').textContent = breakTime + " s";
             document.getElementById('warningValue').textContent = warningTime + " s";
+            document.getElementById('extensionValue').textContent = extensionTime + " s";
         }
 
         function loadCurrent() {
@@ -363,6 +380,7 @@
                 if (s.shotTime != null) document.getElementById('shotTime').value = s.shotTime;
                 if (s.breakTime != null) document.getElementById('breakTime').value = s.breakTime;
                 if (s.warningTime != null) document.getElementById('warningTime').value = s.warningTime;
+                if (s.extensionTime != null) document.getElementById('extensionTime').value = s.extensionTime;
             } catch (e) {}
             updateLabels();
         }
@@ -373,6 +391,7 @@
         document.getElementById('shotTime').addEventListener('input', updateLabels);
         document.getElementById('breakTime').addEventListener('input', updateLabels);
         document.getElementById('warningTime').addEventListener('input', updateLabels);
+        document.getElementById('extensionTime').addEventListener('input', updateLabels);
 
         initAudio();
         loadCurrent();
