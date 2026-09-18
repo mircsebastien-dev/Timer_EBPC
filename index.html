@@ -555,6 +555,8 @@
             // Si le compte à rebours sonore a démarré, l'arrêter et le remettre à zéro pour pouvoir le relire
             stopCountdownSound();
             countdownPlayed = false;
+            // Permettre au bip 25s de se redéclencher si on repasse le seuil après l'extension
+            warningPlayed = false;
             updateDisplay();
 
             document.getElementById('status').textContent = `+30s ${actualTeam}`;
