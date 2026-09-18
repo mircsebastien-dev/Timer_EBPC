@@ -199,6 +199,7 @@
         let audioContext = null;
         let wakeLock = null;
         let countdownPlayed = false;
+        let warningPlayed = false;
 
         // Buffers audio externes (.wav) chargés à volume maximum
         let sound25sBuffer = null;   // bip d'avertissement à 25s
@@ -510,7 +511,7 @@
             document.getElementById('status').className = "status";
             preventSleep();
 
-            let warningPlayed = false;
+
             currentTimer = setInterval(() => {
                 if (isPaused) return;
                 timeRemaining--;
@@ -597,6 +598,7 @@
             isPaused = false;
             breakUsed = false;
             countdownPlayed = false;
+            warningPlayed = false;
             updateDisplay();
             document.getElementById('status').textContent = "Prêt";
             document.getElementById('status').className = "status";
