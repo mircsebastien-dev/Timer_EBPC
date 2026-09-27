@@ -169,17 +169,17 @@
 
     <div class="controls">
         <div class="control-row">
-            <button class="btn-break" id="btnBreak" onclick="startBreakTimer(); unlockAudio();">⚡ CASSE</button>
+            <button class="btn-shot" id="btnShot" onclick="shotPlayed(); unlockAudio();">MAIN EN COURS</button>
         </div>
         <div class="control-row">
-            <button class="btn-shot" id="btnShot" onclick="shotPlayed(); unlockAudio();">MAIN EN COURS</button>
+            <button class="btn-pause" id="btnPause" onclick="togglePause()">⏸️ PAUSE</button>
         </div>
         <div class="control-row">
             <button class="btn-extension" id="btnExtensionA" onclick="addExtension('A'); unlockAudio();">+EXT A</button>
             <button class="btn-extension" id="btnExtensionB" onclick="addExtension('B'); unlockAudio();">+EXT B</button>
         </div>
         <div class="control-row">
-            <button class="btn-pause" id="btnPause" onclick="togglePause()">⏸️ PAUSE</button>
+            <button class="btn-break" id="btnBreak" onclick="startBreakTimer(); unlockAudio();">⚡ CASSE</button>
             <button class="btn-reset" id="btnResetAll" onclick="resetAll()">🔄 RÉINIT</button>
         </div>
     </div>
