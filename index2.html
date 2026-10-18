@@ -623,6 +623,7 @@ function dialTapped() {
     // tap simple différé : s'il n'est pas suivi d'un 2e tap, il lance/met en pause le chrono
     dialSingleTimer = setTimeout(() => {
       dialSingleTimer = null;
+      dialTapTime = 0;
       dialPrimaryAction();
     }, DOUBLE_TAP_MS);
   }
