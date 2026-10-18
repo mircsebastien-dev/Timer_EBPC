@@ -555,8 +555,7 @@ function addExtension(team) {
   // Si le compte à rebours sonore a démarré, l'arrêter et le remettre à zéro pour pouvoir le relire
   stopCountdownSound();
   countdownPlayed = false;
-  warningPlayed = false;   // le bip 25s peut se redéclencher si on repasse le seuil
-  playWarning();
+  warningPlayed = false;   // le bip 25s se redéclenchera seulement si le compteur repasse par 25s
   toast('+30s ' + (team === 'A' ? nameA() : nameB()));
   updateDisplay();
 }
