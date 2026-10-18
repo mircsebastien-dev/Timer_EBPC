@@ -31,12 +31,14 @@
   .half.active::before { opacity: 1; }
   .half:not(.active) { filter: saturate(.25) brightness(.55); }
   .half .teamname {
-    font-size: min(16vw, 15vh); font-weight: 900; letter-spacing: 0;
-    line-height: 1; opacity: .9;
+    position: absolute; top: 4%; left: 50%; transform: translateX(-50%);
+    font-size: min(22vw, 20vh); font-weight: 900; letter-spacing: 0;
+    line-height: 1; opacity: .9; margin: 0;
   }
   #halfA .teamname { color: #7fd0ff; }
   #halfB .teamname { color: #ff9db6; }
   .half .hint { font-size: 10px; opacity: .35; letter-spacing: .08em; text-align: center; }
+  .half .extwrap { position: absolute; bottom: 8%; }
   .half .extwrap { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
   .extdot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.35); transition: all .3s; }
   .extdot.used { background: #4CAF50; border-color: #4CAF50; box-shadow: 0 0 8px #4CAF50; }
@@ -44,7 +46,7 @@
   /* ===== Anneau central ===== */
   #dial {
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-    width: min(78vw, 62vh); aspect-ratio: 1;
+    width: min(88vw, 70vh); aspect-ratio: 1;
     pointer-events: none;
   }
   #dialGlow { pointer-events: auto; cursor: pointer; }
@@ -60,17 +62,34 @@
     box-shadow: 0 0 40px rgba(60,90,200,.35), inset 0 0 24px rgba(0,0,0,.6);
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   }
-  #timeText { font-size: min(40vw, 38vh); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0; line-height: 1; }
+  #timeText { font-size: min(44vw, 42vh); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0; line-height: 1; }
   #timeText.warn { color: #ffb020; text-shadow: 0 0 18px rgba(255,176,32,.6); }
   #timeText.danger { color: #ff4d5e; text-shadow: 0 0 18px rgba(255,77,94,.7); animation: pulse .5s infinite alternate; }
   @keyframes pulse { to { transform: scale(1.06); } }
-  #phaseText { font-size: clamp(10px, 2.6vw, 13px); font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #93a0c4; margin-top: 2vh; }
+  #phaseText { font-size: clamp(10px, 2.6vw, 13px); font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #93a0c4; margin-top: 1vh; }
 
   /* ===== Barre d'actions flottante ===== */
   #dock {
     display: flex; gap: 10px; padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
     justify-content: center; align-items: center;
     background: linear-gradient(to top, rgba(5,7,13,.95), transparent);
+  }
+
+  /* ===== Optimisation mode portrait ===== */
+  @media (orientation: portrait) {
+    #arena { flex-direction: row; }
+    #dial { width: min(92vw, 58vh); }
+    #timeText { font-size: min(38vw, 34vh); }
+    .half .teamname { font-size: min(24vw, 12vh); top: 2%; }
+    .half .extwrap { bottom: 10%; }
+    .dockbtn { padding: 12px 16px; font-size: 12px; }
+    #dock { gap: 8px; }
+    #settingsLink { top: max(8px, env(safe-area-inset-top)); }
+  }
+  @media (orientation: landscape) {
+    #dial { width: min(70vw, 85vh); }
+    #timeText { font-size: min(28vw, 40vh); }
+    .half .teamname { font-size: min(12vw, 18vh); }
   }
   .dockbtn {
     border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06);
