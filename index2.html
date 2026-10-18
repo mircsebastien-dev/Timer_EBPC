@@ -136,10 +136,16 @@
   }
 
   #soundStatus {
-    position: fixed; top: 13px; right: 44px; z-index: 50;
+    position: fixed; top: 13px; right: 76px; z-index: 50;
     font-size: 15px; opacity: .9; pointer-events: none;
     line-height: 20px;
   }
+  #fullscreenBtn {
+    position: fixed; top: 8px; right: 44px; z-index: 50;
+    font-size: 15px; text-decoration: none; opacity: .5;
+    line-height: 20px; cursor: pointer;
+  }
+  #fullscreenBtn:active { opacity: 1; }
 
   #toast {
     position: absolute; left: 50%; top: 16%; transform: translateX(-50%) translateY(-8px);
@@ -155,6 +161,7 @@
 
 <a href="settings.html?from=index2" id="settingsLink" title="Paramètres">⚙️</a>
 <div id="soundStatus">🔊</div>
+<a id="fullscreenBtn" title="Plein écran">⛶</a>
 <div id="toast"></div>
 
 <div id="topbar">
@@ -656,6 +663,30 @@ try {
   if (n.A) document.getElementById('nameA').textContent = n.A;
   if (n.B) document.getElementById('nameB').textContent = n.B;
 } catch (e) {}
+
+// ===== Plein écran =====
+function toggleFullscreen() {
+  const d = document;
+  const el = d.documentElement;
+  if (!d.fullscreenElement && !d.webkitFullscreenElement) {
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else { toast('Plein écran non supporté — ajoute à l\'écran d\'accueil'); return; }
+  } else {
+    if (d.exitFullscreen) d.exitFullscreen().catch(() => {});
+    else if (d.webkitExitFullscreen) d.webkitExitFullscreen();
+  }
+}
+document.getElementById('fullscreenBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleFullscreen();
+});
+document.addEventListener('fullscreenchange', updateFullscreenIcon);
+document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+function updateFullscreenIcon() {
+  const on = document.fullscreenElement || document.webkitFullscreenElement;
+  document.getElementById('fullscreenBtn').textContent = on ? '⤡' : '⛶';
+}
 
 updateDisplay();
 </script>
