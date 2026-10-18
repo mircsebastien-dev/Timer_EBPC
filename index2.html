@@ -55,6 +55,7 @@
   #halfB::before { background: radial-gradient(80% 60% at 80% 20%, rgba(25,100,175,.30), transparent 70%); }
   .half.active::before { opacity: 1; }
   .half:not(.active) { filter: saturate(.25) brightness(.55); }
+  .half:not(.active) .extwrap { filter: none; }   /* pastilles d'extension toujours nettes */
   .half .teamname {
     position: absolute; top: 4%; left: 50%; transform: translateX(-50%);
     font-size: min(22vw, 20vh); font-weight: 900; letter-spacing: 0;
@@ -65,8 +66,17 @@
   .half .hint { font-size: 10px; opacity: .35; letter-spacing: .08em; text-align: center; }
   .half .extwrap { position: absolute; bottom: 8%; }
   .half .extwrap { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
-  .extdot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.35); transition: all .3s; }
-  .extdot.used { background: #e10a19; border-color: #e10a19; box-shadow: 0 0 8px rgba(225,10,25,.9); }
+  .extdot {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.45);
+    transition: all .3s;
+  }
+  .extdot.used {
+    background: #e10a19; border-color: #ffffff;
+    box-shadow: 0 0 14px rgba(225,10,25,1), 0 0 4px rgba(225,10,25,1);
+    opacity: 1;
+  }
+  .half:not(.active) .extdot.used { opacity: 1; }  /* jamais atténuée, même sur la moitié inactive */
 
   /* ===== Anneau central ===== */
   #dial {
