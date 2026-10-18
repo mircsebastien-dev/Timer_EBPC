@@ -44,7 +44,7 @@
   /* ===== Anneau central ===== */
   #dial {
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-    width: min(52vw, 46vh); aspect-ratio: 1; pointer-events: none;
+    width: min(78vw, 62vh); aspect-ratio: 1; pointer-events: none;
   }
   #dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
   #dial .track { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 10; }
@@ -58,7 +58,7 @@
     box-shadow: 0 0 40px rgba(60,90,200,.35), inset 0 0 24px rgba(0,0,0,.6);
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   }
-  #timeText { font-size: clamp(38px, 13vw, 72px); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+  #timeText { font-size: clamp(52px, 19vw, 110px); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
   #timeText.warn { color: #ffb020; text-shadow: 0 0 18px rgba(255,176,32,.6); }
   #timeText.danger { color: #ff4d5e; text-shadow: 0 0 18px rgba(255,77,94,.7); animation: pulse .5s infinite alternate; }
   @keyframes pulse { to { transform: scale(1.06); } }
@@ -108,8 +108,6 @@
 
 <div id="arena">
   <div class="half active" id="halfA">
-    <div class="teamname" id="nameA">Équipe A</div>
-    <div class="hint">tap = extension A<br>+30s</div>
     <div class="extwrap">
       <div class="extdot" id="extDotA"></div>
     </div>
@@ -127,14 +125,12 @@
       <circle class="prog" id="prog" cx="100" cy="100" r="88"/>
     </svg>
     <div id="dialGlow">
-      <div id="timeText">1:30</div>
+      <div id="timeText">90</div>
       <div id="phaseText">Prêt</div>
     </div>
   </div>
 
   <div class="half" id="halfB">
-    <div class="teamname" id="nameB">Équipe B</div>
-    <div class="hint">tap = extension B<br>+30s</div>
     <div class="extwrap">
       <div class="extdot" id="extDotB"></div>
     </div>
@@ -217,13 +213,12 @@ const R = 88, CIRC = 2 * Math.PI * R;
 document.getElementById('prog').style.strokeDasharray = CIRC;
 
 function fmt(s) {
-  s = Math.max(0, Math.round(s));
-  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  return String(Math.max(0, Math.round(s)));
 }
 function phaseLabel() {
   if (phase === 'idle') return 'Prêt';
   if (phase === 'break') return 'Casse';
-  if (phase === 'shot') return turn === 'A' ? 'Main A' : 'Main B';
+  if (phase === 'shot') return turn === 'A' ? 'A' : 'B';
   if (phase === 'paused') return 'Pause';
   return 'Temps écoulé';
 }
@@ -307,8 +302,8 @@ function handOver() {
   toast(turn === 'A' ? '▶ ' + nameA() : '▶ ' + nameB());
   updateDisplay();
 }
-function nameA() { return document.getElementById('nameA').textContent; }
-function nameB() { return document.getElementById('nameB').textContent; }
+function nameA() { const n = document.getElementById('nameA').textContent; return n || 'A'; }
+function nameB() { const n = document.getElementById('nameB').textContent; return n || 'B'; }
 
 function addExtension(team) {
   if (phase !== 'break' && phase !== 'shot' && phase !== 'paused') return;
