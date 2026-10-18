@@ -265,19 +265,32 @@ async function preloadSound(url) {
 async function preloadAllSounds() {
   initAudio();
   if (!audioContext) return;
+  if (audioContext.state === 'suspended') {
+    try { await audioContext.resume(); } catch (e) {}
+  }
   sound25sBuffer = await preloadSound(SOUND_25S_URL);
   sound5sBuffer = await preloadSound(SOUND_5S_URL);
 }
+
+// Garantie : si un buffer manque au moment de jouer, tenter un rechargement immédiat
+async function ensureSoundsReady() {
+  if (sound25sBuffer && sound5sBuffer) return true;
+  await preloadAllSounds();
+  return sound25sBuffer !== null && sound5sBuffer !== null;
+}
 function unlockAudio() {
-  if (audioUnlocked) return;
   initAudio();
   if (audioContext) {
     if (audioContext.state === 'suspended') audioContext.resume();
-    const o = audioContext.createOscillator(), g = audioContext.createGain();
-    o.connect(g); g.connect(audioContext.destination); g.gain.value = 0;
-    o.start(); o.stop(audioContext.currentTime + 0.05);
-    audioUnlocked = true;
-    updateSoundStatus();
+    if (!audioUnlocked) {
+      try {
+        const o = audioContext.createOscillator(), g = audioContext.createGain();
+        o.connect(g); g.connect(audioContext.destination); g.gain.value = 0;
+        o.start(); o.stop(audioContext.currentTime + 0.05);
+      } catch (e) {}
+      audioUnlocked = true;
+      updateSoundStatus();
+    }
     preloadAllSounds();
   }
 }
@@ -306,8 +319,10 @@ let countdownOffset = 0;
 let countdownStartCtxTime = 0;
 let countdownPlaying = false;
 function playCountdownBeep() {
-  if (!audioUnlocked) { unlockAudio(); return; }
-  if (!audioContext || !sound5sBuffer) return;
+  if (!audioUnlocked) { unlockAudio(); }
+  if (!audioContext) return;
+  if (audioContext.state === 'suspended') audioContext.resume();
+  if (!sound5sBuffer) { ensureSoundsReady().then(ok => { if (ok) { stopCountdownSound(); countdownOffset = 0; startCountdownSound(); } }); return; }
   stopCountdownSound();
   countdownOffset = 0;
   startCountdownSound();
@@ -346,7 +361,10 @@ function stopCountdownSound() {
   countdownOffset = 0;
 }
 function playWarning() {
-  if (!audioUnlocked) { unlockAudio(); setTimeout(playWarning, 100); return; }
+  if (!audioUnlocked) { unlockAudio(); }
+  if (!audioContext) return;
+  if (audioContext.state === 'suspended') audioContext.resume();
+  if (!sound25sBuffer) { ensureSoundsReady().then(ok => { if (ok) playBuffer(sound25sBuffer); }); return; }
   playBuffer(sound25sBuffer);
 }
 function playCountdown() { playCountdownBeep(); }

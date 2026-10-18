@@ -326,8 +326,15 @@
             currentSource = source;
         }
 
-        function testSound(which) {
+        async function testSound(which) {
             unlockAudio();
+            document.getElementById('status').textContent = "Chargement du son...";
+            if (!sound25sBuffer || !sound5sBuffer) {
+                await preloadAllSounds();
+            }
+            if (audioContext && audioContext.state === 'suspended') {
+                try { await audioContext.resume(); } catch (e) {}
+            }
             const buffer = which === '25s' ? sound25sBuffer : sound5sBuffer;
             if (!buffer) {
                 document.getElementById('status').textContent = "Son non chargé, réessayez";
