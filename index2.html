@@ -279,6 +279,39 @@ async function preloadAllSounds() {
   }
   sound25sBuffer = await preloadSound(SOUND_25S_URL);
   sound5sBuffer = await preloadSound(SOUND_5S_URL);
+  // Fallback : si un .wav n'a pas pu être chargé/décodé, générer le son en mémoire
+  if (!sound25sBuffer) sound25sBuffer = synthBuffer(0.35, 1250);
+  if (!sound5sBuffer) sound5sBuffer = synthCountdownBuffer();
+  updateSoundStatus();
+}
+
+// Génère un bip simple en mémoire (fallback si le .wav est indisponible)
+function synthBuffer(duration, freq) {
+  const sr = audioContext.sampleRate;
+  const buf = audioContext.createBuffer(1, Math.ceil(sr * duration), sr);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    const t = i / sr;
+    data[i] = Math.sin(2 * Math.PI * freq * t) * 0.9 * Math.max(0, 1 - t / duration);
+  }
+  return buf;
+}
+
+// Génère le compte à rebours final + buzzer en mémoire (fallback de 5s.wav)
+function synthCountdownBuffer() {
+  const sr = audioContext.sampleRate;
+  const total = 7; // 5 bips + 1s pause + buzzer
+  const buf = audioContext.createBuffer(1, Math.ceil(sr * total), sr);
+  const data = buf.getChannelData(0);
+  const addTone = (start, dur, freq, vol) => {
+    for (let i = Math.floor(start * sr); i < Math.min(Math.floor((start + dur) * sr), data.length); i++) {
+      const t = (i / sr) - start;
+      data[i] = Math.sin(2 * Math.PI * freq * t) * vol * Math.max(0, 1 - t / dur);
+    }
+  };
+  for (let n = 0; n < 5; n++) addTone(0.5 + n, 0.25, 900, 0.9);   // bips 5-4-3-2-1
+  addTone(5.5, 1.4, 200, 1.0);                                   // buzzer
+  return buf;
 }
 
 // Garantie : si un buffer manque au moment de jouer, tenter un rechargement immédiat
@@ -403,7 +436,12 @@ function toast(msg) {
   toast._h = setTimeout(() => t.classList.remove('show'), 1600);
 }
 function updateSoundStatus() {
-  document.getElementById('soundStatus').textContent = audioUnlocked ? '🔊' : '🔇';
+  let txt = audioUnlocked ? '🔊' : '🔇';
+  if (audioUnlocked) {
+    if (sound25sBuffer && sound5sBuffer) txt = '🔊';
+    else txt = '⏳';   // sons en cours de chargement
+  }
+  document.getElementById('soundStatus').textContent = txt;
 }
 function updateDisplay() {
   document.getElementById('timeText').textContent = fmt(timeRemaining);

@@ -288,6 +288,34 @@
             if (!audioContext) return;
             sound25sBuffer = await preloadSound(SOUND_25S_URL);
             sound5sBuffer = await preloadSound(SOUND_5S_URL);
+            // Fallback : générer les sons en mémoire si les .wav échouent
+            if (!sound25sBuffer) sound25sBuffer = synthBuffer(0.35, 1250);
+            if (!sound5sBuffer) sound5sBuffer = synthCountdownBuffer();
+        }
+
+        function synthBuffer(duration, freq) {
+            const sr = audioContext.sampleRate;
+            const buf = audioContext.createBuffer(1, Math.ceil(sr * duration), sr);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < data.length; i++) {
+                const t = i / sr;
+                data[i] = Math.sin(2 * Math.PI * freq * t) * 0.9 * Math.max(0, 1 - t / duration);
+            }
+            return buf;
+        }
+        function synthCountdownBuffer() {
+            const sr = audioContext.sampleRate;
+            const buf = audioContext.createBuffer(1, Math.ceil(sr * 7), sr);
+            const data = buf.getChannelData(0);
+            const addTone = (start, dur, freq, vol) => {
+                for (let i = Math.floor(start * sr); i < Math.min(Math.floor((start + dur) * sr), data.length); i++) {
+                    const t = (i / sr) - start;
+                    data[i] = Math.sin(2 * Math.PI * freq * t) * vol * Math.max(0, 1 - t / dur);
+                }
+            };
+            for (let n = 0; n < 5; n++) addTone(0.5 + n, 0.25, 900, 0.9);
+            addTone(5.5, 1.4, 200, 1.0);
+            return buf;
         }
 
         function unlockAudio() {
