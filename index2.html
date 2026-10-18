@@ -608,10 +608,33 @@ function halfTapped(team) {
 document.getElementById('halfA').addEventListener('click', () => halfTapped('A'));
 document.getElementById('halfB').addEventListener('click', () => halfTapped('B'));
 
-// Double-tap n'importe où dans le cercle : s'applique à l'équipe au timer
+// Tap dans le cercle : simple = démarrer le chrono / pause / reprise ; double = extension
+let dialTapTime = 0;
+let dialSingleTimer = null;
+function dialTapped() {
+  const now = Date.now();
+  if (now - dialTapTime < DOUBLE_TAP_MS) {
+    // double-tap : extension pour l'équipe au compteur (annule le tap simple en attente)
+    clearTimeout(dialSingleTimer); dialSingleTimer = null;
+    dialTapTime = 0;
+    addExtension(isBreakTime() ? 'A' : turn);
+  } else {
+    dialTapTime = now;
+    // tap simple différé : s'il n'est pas suivi d'un 2e tap, il lance/met en pause le chrono
+    dialSingleTimer = setTimeout(() => {
+      dialSingleTimer = null;
+      dialPrimaryAction();
+    }, DOUBLE_TAP_MS);
+  }
+}
+function dialPrimaryAction() {
+  if (phase === 'idle') { startBreak(); return; }     // pas encore démarré → lance la casse
+  if (phase === 'over') { handOver(); return; }       // temps écoulé → relance la main
+  togglePause();                                      // sinon : pause / reprise
+}
 document.getElementById('dial').addEventListener('click', () => {
   unlockAudio();
-  halfTapped(isBreakTime() ? 'A' : turn);
+  dialTapped();
 });
 function isBreakTime() { return phase === 'break'; }
 
