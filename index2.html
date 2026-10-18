@@ -41,7 +41,7 @@
   .resetbtn:active { transform: scale(.93); }
 
   /* ===== Écran splitté : chaque équipe possède sa moitié ===== */
-  #arena { flex: 1; display: flex; min-height: 0; position: relative; }
+  #arena { flex: 1; display: flex; min-height: 0; position: relative; cursor: pointer; }
   .half {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 8px; position: relative; overflow: hidden;
@@ -72,9 +72,10 @@
   #dial {
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     width: min(88vw, 70vh); aspect-ratio: 1;
-    pointer-events: auto; cursor: pointer;
-    border-radius: 50%;   /* la zone cliquable est le disque, pas le carré */
+    pointer-events: none;   /* la détection est faite géométriquement au niveau de l'arène */
+    border-radius: 50%;
   }
+  #dial svg, #dialGlow { pointer-events: none; }
   #dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
   #dial .track { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 10; }
   #dial .prog {
@@ -590,52 +591,59 @@ document.getElementById('btnPause').addEventListener('click', togglePause);
 document.getElementById('btnReset').addEventListener('click', resetAll);
 
 // UX : double-tap sur sa moitié = demander l'extension de SON équipe
-let tapTime = { A: 0, B: 0 };
 const DOUBLE_TAP_MS = 350;
-function halfTapped(team) {
-  unlockAudio();
-  const now = Date.now();
-  if (now - tapTime[team] < DOUBLE_TAP_MS) {
-    tapTime[team] = 0;
-    addExtension(team);
-  } else {
-    // tap simple : sélectionne l'équipe au compteur
-    selectTeam(team);
-    tapTime[team] = now;
-  }
-}
-document.getElementById('halfA').addEventListener('click', () => halfTapped('A'));
-document.getElementById('halfB').addEventListener('click', () => halfTapped('B'));
 
-// Tap dans le cercle : simple = démarrer le chrono / pause / reprise ; double = extension
-let dialTapTime = 0;
-let dialSingleTimer = null;
-function dialTapped() {
-  const now = Date.now();
-  if (now - dialTapTime < DOUBLE_TAP_MS) {
-    // double-tap : extension pour l'équipe au compteur (annule le tap simple en attente)
-    clearTimeout(dialSingleTimer); dialSingleTimer = null;
-    dialTapTime = 0;
-    addExtension(isBreakTime() ? 'A' : turn);
-  } else {
-    dialTapTime = now;
-    // tap simple différé : s'il n'est pas suivi d'un 2e tap, il lance/met en pause le chrono
-    dialSingleTimer = setTimeout(() => {
-      dialSingleTimer = null;
-      dialTapTime = 0;
-      dialPrimaryAction();
-    }, DOUBLE_TAP_MS);
-  }
+// ===== Détection géométrique unique : le tap est-il dans le disque central ? =====
+// L'arène capte tout ; on décide selon la position du tap :
+//   - dans le disque (rayon du cercle) → action chrono (pause/reprise/lancement) ou extension
+//   - hors du disque, moitié gauche → équipe A ; moitié droite → équipe B
+function tapInDial(x, y) {
+  const dial = document.getElementById('dial');
+  const r = dial.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  const radius = r.width / 2;
+  const dx = x - cx, dy = y - cy;
+  return dx * dx + dy * dy <= radius * radius;
 }
-function dialPrimaryAction() {
-  if (phase === 'idle') { startBreak(); return; }     // pas encore démarré → lance la casse
-  if (phase === 'over') { handOver(); return; }       // temps écoulé → relance la main
-  togglePause();                                      // sinon : pause / reprise
-}
-document.getElementById('dial').addEventListener('click', () => {
+
+let lastTap = { zone: '', time: 0 };
+let singleTapTimer = null;
+
+function arenaTapped(e) {
   unlockAudio();
-  dialTapped();
-});
+  const inDial = tapInDial(e.clientX, e.clientY);
+  const zone = inDial ? 'dial' : (e.clientX < window.innerWidth / 2 ? 'A' : 'B');
+  const now = Date.now();
+  const isDouble = zone === lastTap.zone && (now - lastTap.time) < DOUBLE_TAP_MS;
+
+  if (isDouble) {
+    // double-tap : annule le tap simple en attente et donne l'extension
+    clearTimeout(singleTapTimer); singleTapTimer = null;
+    lastTap = { zone: '', time: 0 };
+    if (inDial) addExtension(isBreakTime() ? 'A' : turn);
+    else addExtension(zone);
+    return;
+  }
+
+  lastTap = { zone, time: now };
+  // tap simple différé pour laisser la place à un éventuel double-tap
+  clearTimeout(singleTapTimer);
+  singleTapTimer = setTimeout(() => {
+    singleTapTimer = null;
+    lastTap = { zone: '', time: 0 };
+    if (inDial) {
+      // dans le cercle : lancement / pause / reprise / relance
+      if (phase === 'idle') startBreak();
+      else if (phase === 'over') handOver();
+      else togglePause();
+    } else {
+      // sur une moitié : sélection de l'équipe
+      selectTeam(zone);
+    }
+  }, DOUBLE_TAP_MS);
+}
+document.getElementById('arena').addEventListener('click', arenaTapped);
 function isBreakTime() { return phase === 'break'; }
 
 // iOS : déverrouiller l'audio au premier toucher n'importe où sur la page
