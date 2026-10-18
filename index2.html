@@ -425,7 +425,7 @@ function startInterval() {
     if (isPaused) return;
     timeRemaining--;
     updateDisplay();
-    if (phase !== 'break' && timeRemaining === S.warningTime && !warningPlayed) {
+    if (timeRemaining === S.warningTime && !warningPlayed) {
       playWarning(); warningPlayed = true;
     }
     if (timeRemaining === S.countdownStart && !countdownPlayed) {
@@ -530,6 +530,7 @@ document.getElementById('btnReset').addEventListener('click', resetAll);
 let tapTime = { A: 0, B: 0 };
 const DOUBLE_TAP_MS = 350;
 function halfTapped(team) {
+  unlockAudio();
   const now = Date.now();
   if (now - tapTime[team] < DOUBLE_TAP_MS) {
     tapTime[team] = 0;
@@ -543,6 +544,7 @@ document.getElementById('halfB').addEventListener('click', () => halfTapped('B')
 
 // Double-tap n'importe où dans le cercle : s'applique à l'équipe au timer
 document.getElementById('dial').addEventListener('click', () => {
+  unlockAudio();
   halfTapped(isBreakTime() ? 'A' : turn);
 });
 function isBreakTime() { return phase === 'break'; }
