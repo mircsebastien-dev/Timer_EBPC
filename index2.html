@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Timer Blackball — Nova</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+    background: radial-gradient(140% 100% at 50% 0%, #141a2e 0%, #05070d 60%);
+    color: #eef2ff;
+    display: flex; flex-direction: column;
+    touch-action: manipulation;
+  }
+
+  /* ===== Écran splitté : chaque équipe possède sa moitié ===== */
+  #arena { flex: 1; display: flex; min-height: 0; position: relative; }
+  .half {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; position: relative; overflow: hidden;
+    transition: filter .3s, opacity .3s;
+    padding: 6px;
+  }
+  .half::before {
+    content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .35s;
+  }
+  #halfA::before { background: radial-gradient(80% 60% at 20% 20%, rgba(0,150,255,.25), transparent 70%); }
+  #halfB::before { background: radial-gradient(80% 60% at 80% 20%, rgba(255,80,120,.25), transparent 70%); }
+  .half.active::before { opacity: 1; }
+  .half:not(.active) { filter: saturate(.25) brightness(.55); }
+  .half .teamname {
+    font-size: clamp(12px, 3.2vw, 16px); font-weight: 800; letter-spacing: .14em;
+    text-transform: uppercase; opacity: .85;
+  }
+  #halfA .teamname { color: #7fd0ff; }
+  #halfB .teamname { color: #ff9db6; }
+  .half .hint { font-size: 10px; opacity: .35; letter-spacing: .08em; text-align: center; }
+  .half .extwrap { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
+  .extdot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.35); transition: all .3s; }
+  .extdot.used { background: #4CAF50; border-color: #4CAF50; box-shadow: 0 0 8px #4CAF50; }
+
+  /* ===== Anneau central ===== */
+  #dial {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(52vw, 46vh); aspect-ratio: 1; pointer-events: none;
+  }
+  #dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  #dial .track { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 10; }
+  #dial .prog {
+    fill: none; stroke: url(#grad); stroke-width: 10; stroke-linecap: round;
+    filter: drop-shadow(0 0 8px rgba(120,160,255,.8));
+    transition: stroke-dashoffset .25s linear;
+  }
+  #dialGlow { position: absolute; inset: 18%; border-radius: 50%;
+    background: radial-gradient(circle, rgba(30,45,90,.9), rgba(8,12,22,.95) 75%);
+    box-shadow: 0 0 40px rgba(60,90,200,.35), inset 0 0 24px rgba(0,0,0,.6);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  }
+  #timeText { font-size: clamp(38px, 13vw, 72px); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+  #timeText.warn { color: #ffb020; text-shadow: 0 0 18px rgba(255,176,32,.6); }
+  #timeText.danger { color: #ff4d5e; text-shadow: 0 0 18px rgba(255,77,94,.7); animation: pulse .5s infinite alternate; }
+  @keyframes pulse { to { transform: scale(1.06); } }
+  #phaseText { font-size: clamp(10px, 2.6vw, 13px); font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #93a0c4; }
+
+  /* ===== Barre d'actions flottante ===== */
+  #dock {
+    display: flex; gap: 10px; padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+    justify-content: center; align-items: center;
+    background: linear-gradient(to top, rgba(5,7,13,.95), transparent);
+  }
+  .dockbtn {
+    border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: #eef2ff; border-radius: 999px; padding: 13px 18px;
+    font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    transition: transform .12s, background .2s;
+  }
+  .dockbtn:active { transform: scale(.93); }
+  .dockbtn:disabled { opacity: .3; }
+  #btnBreak { background: linear-gradient(135deg, #2957ff, #7a3bff); border: none; }
+  #btnPause { background: linear-gradient(135deg, #b8860b, #ff9d2e); border: none; }
+  #btnReset { background: linear-gradient(135deg, #c62f45, #ff5e4d); border: none; }
+
+  #settingsLink {
+    position: absolute; top: 10px; right: 12px; z-index: 5;
+    font-size: 20px; text-decoration: none; opacity: .45;
+  }
+
+  #soundStatus { position: absolute; top: 12px; left: 14px; font-size: 13px; opacity: .6; }
+
+  #toast {
+    position: absolute; left: 50%; top: 16%; transform: translateX(-50%) translateY(-8px);
+    background: rgba(20,28,50,.92); border: 1px solid rgba(255,255,255,.15);
+    padding: 10px 22px; border-radius: 999px; font-weight: 800; letter-spacing: .05em;
+    opacity: 0; transition: all .3s; pointer-events: none; z-index: 6;
+    box-shadow: 0 8px 30px rgba(0,0,0,.5);
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<a href="settings.html" id="settingsLink" title="Paramètres">⚙️</a>
+<div id="soundStatus">🔊</div>
+<div id="toast"></div>
+
+<div id="arena">
+  <div class="half active" id="halfA">
+    <div class="teamname" id="nameA">Équipe A</div>
+    <div class="hint">tap = extension A<br>+30s</div>
+    <div class="extwrap">
+      <div class="extdot" id="extDotA"></div>
+    </div>
+  </div>
+
+  <div id="dial">
+    <svg viewBox="0 0 200 200">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#2957ff"/>
+          <stop offset="100%" stop-color="#7a3bff"/>
+        </linearGradient>
+      </defs>
+      <circle class="track" cx="100" cy="100" r="88"/>
+      <circle class="prog" id="prog" cx="100" cy="100" r="88"/>
+    </svg>
+    <div id="dialGlow">
+      <div id="timeText">1:30</div>
+      <div id="phaseText">Prêt</div>
+    </div>
+  </div>
+
+  <div class="half" id="halfB">
+    <div class="teamname" id="nameB">Équipe B</div>
+    <div class="hint">tap = extension B<br>+30s</div>
+    <div class="extwrap">
+      <div class="extdot" id="extDotB"></div>
+    </div>
+  </div>
+</div>
+
+<div id="dock">
+  <button class="dockbtn" id="btnBreak">⚡ Casse</button>
+  <button class="dockbtn" id="btnHand">Tap main ⏭</button>
+  <button class="dockbtn" id="btnPause">⏸ Pause</button>
+  <button class="dockbtn" id="btnReset">⟲ Reset</button>
+</div>
+
+<script>
+// ===== Paramètres de session (compatibles settings.html) =====
+function loadSessionSettings() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem('timerSettings') || '{}');
+    return {
+      shotTime: s.shotTime != null ? s.shotTime : 45,
+      breakTime: s.breakTime != null ? s.breakTime : 90,
+      warningTime: s.warningTime != null ? s.warningTime : 25,
+      extensionTime: s.extensionTime != null ? s.extensionTime : 30,
+      countdownStart: s.countdownStart != null ? s.countdownStart : 5
+    };
+  } catch (e) {
+    return { shotTime: 45, breakTime: 90, warningTime: 25, extensionTime: 30, countdownStart: 5 };
+  }
+}
+const S = loadSessionSettings();
+
+// ===== État =====
+let phase = 'idle';            // idle | break | shot | paused | over
+let turn = 'A';                // équipe au timer (casse = A)
+let timeRemaining = S.breakTime;
+let totalTime = S.breakTime;   // pour l'anneau
+let timer = null;
+let isPaused = false;
+let extUsed = { A: false, B: false };
+let extJustGranted = false;    // jamais deux extensions à la suite
+let breakUsed = false;
+let warningPlayed = false;
+let countdownPlayed = false;
+
+// ===== Audio =====
+let audioContext = null, audioUnlocked = false;
+function initAudio() {
+  if (!audioContext) {
+    try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) {}
+  }
+}
+function unlockAudio() {
+  if (audioUnlocked) return;
+  initAudio();
+  if (audioContext) {
+    if (audioContext.state === 'suspended') audioContext.resume();
+    const o = audioContext.createOscillator(), g = audioContext.createGain();
+    o.connect(g); g.connect(audioContext.destination); g.gain.value = 0;
+    o.start(); o.stop(audioContext.currentTime + 0.05);
+    audioUnlocked = true;
+    updateSoundStatus();
+  }
+}
+function beep(freq, dur, when) {
+  if (!audioContext) return;
+  const t = audioContext.currentTime + (when || 0);
+  const o = audioContext.createOscillator(), g = audioContext.createGain();
+  o.frequency.value = freq; o.connect(g); g.connect(audioContext.destination);
+  g.gain.setValueAtTime(0.4, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function playWarning() { beep(1250, 0.18); }
+function playCountdown() { for (let i = 0; i < S.countdownStart; i++) beep(900, 0.1, i); }
+function playBuzzer() { beep(220, 0.9); beep(180, 0.9, 0.05); }
+
+// ===== Affichage =====
+const R = 88, CIRC = 2 * Math.PI * R;
+document.getElementById('prog').style.strokeDasharray = CIRC;
+
+function fmt(s) {
+  s = Math.max(0, Math.round(s));
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+function phaseLabel() {
+  if (phase === 'idle') return 'Prêt';
+  if (phase === 'break') return 'Casse';
+  if (phase === 'shot') return turn === 'A' ? 'Main A' : 'Main B';
+  if (phase === 'paused') return 'Pause';
+  return 'Temps écoulé';
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(() => t.classList.remove('show'), 1600);
+}
+function updateSoundStatus() {
+  document.getElementById('soundStatus').textContent = audioUnlocked ? '🔊' : '🔇';
+}
+function updateDisplay() {
+  document.getElementById('timeText').textContent = fmt(timeRemaining);
+  document.getElementById('phaseText').textContent = phaseLabel();
+
+  const frac = Math.max(0, Math.min(1, timeRemaining / totalTime));
+  document.getElementById('prog').style.strokeDashoffset = CIRC * (1 - frac);
+
+  const tt = document.getElementById('timeText');
+  if (phase !== 'idle' && phase !== 'over' && timeRemaining <= 10) tt.className = 'danger';
+  else if (phase !== 'idle' && timeRemaining <= S.warningTime) tt.className = 'warn';
+  else tt.className = '';
+
+  document.getElementById('halfA').classList.toggle('active', phase !== 'idle' && phase !== 'over' && turn === 'A');
+  document.getElementById('halfB').classList.toggle('active', phase !== 'idle' && phase !== 'over' && turn === 'B');
+  document.getElementById('extDotA').classList.toggle('used', extUsed.A);
+  document.getElementById('extDotB').classList.toggle('used', extUsed.B);
+
+  document.getElementById('btnBreak').disabled = breakUsed || phase === 'break' || phase === 'paused';
+  document.getElementById('btnPause').disabled = phase === 'idle' || phase === 'over';
+  document.getElementById('btnHand').disabled = phase === 'idle' || phase === 'over';
+  updateSoundStatus();
+}
+
+// ===== Moteur =====
+function stopTimer() { clearInterval(timer); timer = null; }
+function startInterval() {
+  stopTimer();
+  timer = setInterval(() => {
+    if (isPaused) return;
+    timeRemaining--;
+    updateDisplay();
+    if (phase !== 'break' && timeRemaining === S.warningTime && !warningPlayed) {
+      playWarning(); warningPlayed = true;
+    }
+    if (timeRemaining === S.countdownStart && !countdownPlayed) {
+      playCountdown(); countdownPlayed = true;
+    }
+    if (timeRemaining <= 0) {
+      stopTimer();
+      phase = 'over';
+      playBuzzer();
+      toast('⏱ Temps écoulé');
+      updateDisplay();
+    }
+  }, 1000);
+}
+function startBreak() {
+  if (breakUsed) return;
+  breakUsed = true;
+  unlockAudio();
+  phase = 'break'; turn = 'A'; isPaused = false;
+  timeRemaining = totalTime = S.breakTime;
+  warningPlayed = false; countdownPlayed = false; extJustGranted = false;
+  startInterval();
+  updateDisplay();
+}
+function handOver() {
+  if (phase === 'over' || phase === 'idle') return;
+  unlockAudio();
+  const wasBreak = phase === 'break';
+  phase = 'shot';
+  turn = wasBreak ? 'A' : (turn === 'A' ? 'B' : 'A');
+  timeRemaining = totalTime = S.shotTime;
+  isPaused = false;
+  warningPlayed = false; countdownPlayed = false;
+  extJustGranted = false;      // un nouveau coup réautorise une extension
+  startInterval();
+  toast(turn === 'A' ? '▶ ' + nameA() : '▶ ' + nameB());
+  updateDisplay();
+}
+function nameA() { return document.getElementById('nameA').textContent; }
+function nameB() { return document.getElementById('nameB').textContent; }
+
+function addExtension(team) {
+  if (phase !== 'break' && phase !== 'shot' && phase !== 'paused') return;
+  if (phase === 'paused') return;
+  if (extUsed[team]) { toast('Extension déjà utilisée'); return; }
+  if (extJustGranted) { toast('Une seule extension à la suite'); return; }
+  if (phase === 'break' && team !== 'A') return;   // pendant la casse : équipe A
+  if (phase === 'shot' && team !== turn) return;   // seulement l'équipe au timer
+  unlockAudio();
+  extUsed[team] = true;
+  extJustGranted = true;
+  timeRemaining += S.extensionTime;
+  totalTime = Math.max(totalTime, timeRemaining);
+  warningPlayed = false; countdownPlayed = false;
+  beep(700, 0.12);
+  toast('+30s ' + (team === 'A' ? nameA() : nameB()));
+  updateDisplay();
+}
+
+function togglePause() {
+  if (phase === 'idle' || phase === 'over') return;
+  unlockAudio();
+  isPaused = !isPaused;
+  document.getElementById('btnPause').textContent = isPaused ? '▶ Reprendre' : '⏸ Pause';
+  toast(isPaused ? '⏸ Pause' : '▶ Reprise');
+  updateDisplay();
+}
+function resetAll() {
+  stopTimer();
+  phase = 'idle'; turn = 'A'; isPaused = false; breakUsed = false;
+  timeRemaining = totalTime = S.breakTime;
+  extUsed = { A: false, B: false };
+  extJustGranted = false;
+  warningPlayed = false; countdownPlayed = false;
+  document.getElementById('btnPause').textContent = '⏸ Pause';
+  updateDisplay();
+}
+
+// ===== Interactions =====
+document.getElementById('btnBreak').addEventListener('click', startBreak);
+document.getElementById('btnHand').addEventListener('click', handOver);
+document.getElementById('btnPause').addEventListener('click', togglePause);
+document.getElementById('btnReset').addEventListener('click', resetAll);
+
+// UX disruptive : taper sur sa moitié = demander l'extension de SON équipe
+document.getElementById('halfA').addEventListener('click', () => addExtension('A'));
+document.getElementById('halfB').addEventListener('click', () => addExtension('B'));
+
+// Noms d'équipes persistés (settings.html peut les définir)
+try {
+  const n = JSON.parse(sessionStorage.getItem('timerNames') || '{}');
+  if (n.A) document.getElementById('nameA').textContent = n.A;
+  if (n.B) document.getElementById('nameB').textContent = n.B;
+} catch (e) {}
+
+updateDisplay();
+</script>
+</body>
+</html>
