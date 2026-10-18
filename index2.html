@@ -135,8 +135,9 @@
   }
 
   #soundStatus {
-    position: fixed; top: 4px; right: 44px; z-index: 50;
+    position: fixed; top: 13px; right: 44px; z-index: 50;
     font-size: 15px; opacity: .9; pointer-events: none;
+    line-height: 20px;
   }
 
   #toast {
@@ -512,9 +513,8 @@ function startBreak() {
 function handOver() {
   if (phase === 'over' || phase === 'idle') return;
   unlockAudio();
-  const wasBreak = phase === 'break';
+  // Le compteur repart pour l'équipe sélectionnée (turn) — pas de bascule automatique A/B
   phase = 'shot';
-  turn = wasBreak ? 'A' : (turn === 'A' ? 'B' : 'A');
   timeRemaining = totalTime = S.shotTime;
   isPaused = false;
   stopCountdownSound();
@@ -522,7 +522,19 @@ function handOver() {
   warningPlayed = false; countdownPlayed = false;
   extJustGranted = false;      // un nouveau coup réautorise une extension
   startInterval();
-  toast(turn === 'A' ? '▶ ' + nameA() : '▶ ' + nameB());
+  toast('▶ ' + (turn === 'A' ? nameA() : nameB()));
+  updateDisplay();
+}
+
+// Sélection manuelle de l'équipe au compteur (tap sur A ou B)
+function selectTeam(team) {
+  if (phase === 'idle' || phase === 'over') return;
+  unlockAudio();
+  if (phase === 'break') return;   // pendant la casse : équipe A imposée
+  if (turn === team) return;      // déjà sélectionnée
+  turn = team;
+  // Le compteur en cours bascule pour la nouvelle équipe, au temps restant du coup en cours
+  toast('Sélection ' + (team === 'A' ? nameA() : nameB()));
   updateDisplay();
 }
 function nameA() { const n = document.getElementById('nameA').textContent; return n || 'A'; }
@@ -589,6 +601,8 @@ function halfTapped(team) {
     tapTime[team] = 0;
     addExtension(team);
   } else {
+    // tap simple : sélectionne l'équipe au compteur
+    selectTeam(team);
     tapTime[team] = now;
   }
 }
