@@ -53,16 +53,16 @@
     filter: drop-shadow(0 0 8px rgba(120,160,255,.8));
     transition: stroke-dashoffset .25s linear;
   }
-  #dialGlow { position: absolute; inset: 18%; border-radius: 50%;
+  #dialGlow { position: absolute; inset: 12%; border-radius: 50%;
     background: radial-gradient(circle, rgba(30,45,90,.9), rgba(8,12,22,.95) 75%);
     box-shadow: 0 0 40px rgba(60,90,200,.35), inset 0 0 24px rgba(0,0,0,.6);
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   }
-  #timeText { font-size: clamp(52px, 19vw, 110px); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+  #timeText { font-size: min(34vw, 32vh); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0; line-height: 1; }
   #timeText.warn { color: #ffb020; text-shadow: 0 0 18px rgba(255,176,32,.6); }
   #timeText.danger { color: #ff4d5e; text-shadow: 0 0 18px rgba(255,77,94,.7); animation: pulse .5s infinite alternate; }
   @keyframes pulse { to { transform: scale(1.06); } }
-  #phaseText { font-size: clamp(10px, 2.6vw, 13px); font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #93a0c4; }
+  #phaseText { font-size: clamp(10px, 2.6vw, 13px); font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #93a0c4; margin-top: 2vh; }
 
   /* ===== Barre d'actions flottante ===== */
   #dock {
@@ -348,9 +348,20 @@ document.getElementById('btnHand').addEventListener('click', handOver);
 document.getElementById('btnPause').addEventListener('click', togglePause);
 document.getElementById('btnReset').addEventListener('click', resetAll);
 
-// UX disruptive : taper sur sa moitié = demander l'extension de SON équipe
-document.getElementById('halfA').addEventListener('click', () => addExtension('A'));
-document.getElementById('halfB').addEventListener('click', () => addExtension('B'));
+// UX : double-tap sur sa moitié = demander l'extension de SON équipe
+let tapTime = { A: 0, B: 0 };
+const DOUBLE_TAP_MS = 350;
+function halfTapped(team) {
+  const now = Date.now();
+  if (now - tapTime[team] < DOUBLE_TAP_MS) {
+    tapTime[team] = 0;
+    addExtension(team);
+  } else {
+    tapTime[team] = now;
+  }
+}
+document.getElementById('halfA').addEventListener('click', () => halfTapped('A'));
+document.getElementById('halfB').addEventListener('click', () => halfTapped('B'));
 
 // Noms d'équipes persistés (settings.html peut les définir)
 try {
