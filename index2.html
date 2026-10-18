@@ -15,6 +15,28 @@
     touch-action: manipulation;
   }
 
+  /* ===== Barre du haut : reset à gauche, logo au centre ===== */
+  #topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px 0;
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+  #topbar .side { width: clamp(64px, 16vw, 96px); }
+  .logo {
+    width: clamp(64px, 16vw, 96px); height: clamp(64px, 16vw, 96px);
+    border-radius: 50%; object-fit: cover;
+    box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  }
+  .resetbtn {
+    border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: #ff8f9d; border-radius: 999px; padding: 12px 0;
+    width: clamp(64px, 16vw, 96px); font-size: 11px; font-weight: 800;
+    letter-spacing: .06em; text-transform: uppercase;
+    transition: transform .12s, background .2s;
+  }
+  .resetbtn:active { transform: scale(.93); }
+
   /* ===== Écran splitté : chaque équipe possède sa moitié ===== */
   #arena { flex: 1; display: flex; min-height: 0; position: relative; }
   .half {
@@ -82,7 +104,7 @@
     #timeText { font-size: min(38vw, 34vh); }
     .half .teamname { font-size: min(24vw, 12vh); top: 2%; }
     .half .extwrap { bottom: 10%; }
-    .dockbtn { padding: 12px 16px; font-size: 12px; }
+    .dockbtn { padding: 18px 8px; min-height: 60px; }
     #dock { gap: 8px; }
     #settingsLink { top: max(8px, env(safe-area-inset-top)); }
   }
@@ -94,15 +116,15 @@
   .dockbtn {
     border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    color: #eef2ff; border-radius: 999px; padding: 13px 18px;
-    font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    color: #eef2ff; border-radius: 999px; padding: 20px 10px;
+    flex: 1; max-width: 180px; min-height: 64px;
+    font-size: clamp(14px, 3.6vw, 17px); font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
     transition: transform .12s, background .2s;
   }
   .dockbtn:active { transform: scale(.93); }
   .dockbtn:disabled { opacity: .3; }
   #btnBreak { background: linear-gradient(135deg, #2957ff, #7a3bff); border: none; }
   #btnPause { background: linear-gradient(135deg, #b8860b, #ff9d2e); border: none; }
-  #btnReset { background: linear-gradient(135deg, #c62f45, #ff5e4d); border: none; }
 
   #settingsLink {
     position: absolute; top: 10px; right: 12px; z-index: 5;
@@ -126,6 +148,12 @@
 <a href="settings.html" id="settingsLink" title="Paramètres">⚙️</a>
 <div id="soundStatus">🔊</div>
 <div id="toast"></div>
+
+<div id="topbar">
+  <button class="resetbtn" id="btnReset">⟲ Reset</button>
+  <img src="logo.jpg" alt="Logo" class="logo">
+  <div class="side"></div>
+</div>
 
 <div id="arena">
   <div class="half active" id="halfA">
@@ -164,7 +192,6 @@
   <button class="dockbtn" id="btnBreak">⚡ Casse</button>
   <button class="dockbtn" id="btnHand">Tap main ⏭</button>
   <button class="dockbtn" id="btnPause">⏸ Pause</button>
-  <button class="dockbtn" id="btnReset">⟲ Reset</button>
 </div>
 
 <script>
