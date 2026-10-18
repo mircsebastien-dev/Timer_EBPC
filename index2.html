@@ -563,7 +563,7 @@ function addExtension(team) {
   stopCountdownSound();
   countdownPlayed = false;
   warningPlayed = false;   // le bip 25s se redéclenchera seulement si le compteur repasse par 25s
-  toast('+30s ' + (team === 'A' ? nameA() : nameB()));
+  toast('+' + S.extensionTime + 's ' + (team === 'A' ? nameA() : nameB()));
   updateDisplay();
 }
 
