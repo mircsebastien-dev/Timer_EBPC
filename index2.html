@@ -131,7 +131,10 @@
     font-size: 20px; text-decoration: none; opacity: .45;
   }
 
-  #soundStatus { position: absolute; top: 12px; left: 14px; font-size: 13px; opacity: .6; }
+  #soundStatus {
+    position: fixed; top: 4px; left: 8px; z-index: 50;
+    font-size: 15px; opacity: .9; pointer-events: none;
+  }
 
   #toast {
     position: absolute; left: 50%; top: 16%; transform: translateX(-50%) translateY(-8px);
@@ -259,7 +262,13 @@ async function preloadSound(url) {
   try {
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
-    return await audioContext.decodeAudioData(arrayBuffer);
+    // Compat iOS : forme promesse avec fallback callback
+    if (audioContext.decodeAudioData.length === 1) {
+      return await audioContext.decodeAudioData(arrayBuffer);
+    }
+    return await new Promise((resolve, reject) => {
+      audioContext.decodeAudioData(arrayBuffer, resolve, reject);
+    });
   } catch (e) { return null; }
 }
 async function preloadAllSounds() {
@@ -284,9 +293,12 @@ function unlockAudio() {
     if (audioContext.state === 'suspended') audioContext.resume();
     if (!audioUnlocked) {
       try {
-        const o = audioContext.createOscillator(), g = audioContext.createGain();
-        o.connect(g); g.connect(audioContext.destination); g.gain.value = 0;
-        o.start(); o.stop(audioContext.currentTime + 0.05);
+        // iOS : un buffer de silence réel (et non un oscillateur à gain 0) débloque l'audio
+        const buffer = audioContext.createBuffer(1, 1, 22050);
+        const src = audioContext.createBufferSource();
+        src.buffer = buffer;
+        src.connect(audioContext.destination);
+        src.start(0);
       } catch (e) {}
       audioUnlocked = true;
       updateSoundStatus();
@@ -548,6 +560,10 @@ document.getElementById('dial').addEventListener('click', () => {
   halfTapped(isBreakTime() ? 'A' : turn);
 });
 function isBreakTime() { return phase === 'break'; }
+
+// iOS : déverrouiller l'audio au premier toucher n'importe où sur la page
+document.body.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+document.body.addEventListener('click', unlockAudio, { once: true });
 
 // Noms d'équipes persistés (settings.html peut les définir)
 try {

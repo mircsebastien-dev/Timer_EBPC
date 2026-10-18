@@ -270,7 +270,13 @@
             try {
                 const response = await fetch(url);
                 const arrayBuffer = await response.arrayBuffer();
-                return await audioContext.decodeAudioData(arrayBuffer);
+                // Compat iOS : forme promesse avec fallback callback (anciens Safari)
+                if (audioContext.decodeAudioData.length === 1) {
+                    return await audioContext.decodeAudioData(arrayBuffer);
+                }
+                return await new Promise((resolve, reject) => {
+                    audioContext.decodeAudioData(arrayBuffer, resolve, reject);
+                });
             } catch (e) {
                 console.log("Erreur chargement son:", url, e);
                 return null;
@@ -291,13 +297,14 @@
                 if (audioContext.state === 'suspended') {
                     audioContext.resume();
                 }
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                gainNode.gain.value = 0;
-                oscillator.start();
-                oscillator.stop(audioContext.currentTime + 0.1);
+                // iOS : buffer de silence réel (plutôt qu'oscillateur à gain 0) pour débloquer l'audio
+                try {
+                    const buffer = audioContext.createBuffer(1, 1, 22050);
+                    const src = audioContext.createBufferSource();
+                    src.buffer = buffer;
+                    src.connect(audioContext.destination);
+                    src.start(0);
+                } catch (e) {}
                 audioUnlocked = true;
                 preloadAllSounds();
             }
