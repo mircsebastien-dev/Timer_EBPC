@@ -200,6 +200,7 @@
         let wakeLock = null;
         let countdownPlayed = false;
         let warningPlayed = false;
+        let extensionJustGranted = false;  // empêche deux extensions à la suite au sein d'une même main/casse
 
         // Buffers audio externes (.wav) chargés à volume maximum
         let sound25sBuffer = null;   // bip d'avertissement à 25s
@@ -310,8 +311,8 @@
             }
 
             // Désactiver les boutons d'extension si déjà utilisés
-            document.getElementById('btnExtensionA').disabled = extensionAUsed;
-            document.getElementById('btnExtensionB').disabled = extensionBUsed;
+            document.getElementById('btnExtensionA').disabled = extensionAUsed || extensionJustGranted;
+            document.getElementById('btnExtensionB').disabled = extensionBUsed || extensionJustGranted;
             document.getElementById('btnBreak').disabled = breakUsed;
 
             // Mettre à jour l'icône son
@@ -470,6 +471,7 @@
             clearInterval(currentTimer);
             timeRemaining = BREAK_TIME;
             currentExtensionTime = 0;
+            extensionJustGranted = false;  // nouvelle main : extensions à nouveau autorisées
             countdownPlayed = false;
             isBreakTime = true;
             isPaused = false;
@@ -515,6 +517,7 @@
             // Appliquer les extensions pour cette main
             timeRemaining = SHOT_TIME + currentExtensionTime;
             currentExtensionTime = 0;
+            extensionJustGranted = false;  // un nouveau coup autorise à nouveau une extension
             countdownPlayed = false;
             warningPlayed = false;
 
@@ -553,6 +556,9 @@
         // Ajouter une extension
         function addExtension(team) {
             if ((team === 'A' && extensionAUsed) || (team === 'B' && extensionBUsed)) return;
+            // Interdire deux extensions à la suite dans la même main/casse
+            if (extensionJustGranted) return;
+            extensionJustGranted = true;
 
             // Pendant la casse, forcer l'équipe A
             const actualTeam = isBreakTime ? 'A' : team;
@@ -605,6 +611,7 @@
             timeRemaining = BREAK_TIME;
             extensionAUsed = false;
             extensionBUsed = false;
+            extensionJustGranted = false;
             currentExtensionTime = 0;
             isBreakTime = false;
             isPaused = false;
