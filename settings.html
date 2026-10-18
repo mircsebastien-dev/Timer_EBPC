@@ -173,7 +173,7 @@
     <div class="header">
         <img src="logo.jpg" alt="Logo LOB" class="logo">
         <div>
-            <a href="index.html" class="back-link" title="Retour">⬅️</a>
+            <a href="index.html" id="backLink" class="back-link" title="Retour">⬅️</a>
             ⚙️ PARAMÈTRES
         </div>
     </div>
@@ -395,6 +395,18 @@
 
         initAudio();
         loadCurrent();
+
+        // Retour dynamique : revenir à la page qui a ouvert les paramètres
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const from = params.get('from');
+            const valid = from === 'index2' ? 'index2.html' : (from === 'index' ? 'index.html' : null);
+            if (valid) {
+                sessionStorage.setItem('settingsReturnTo', valid);
+            }
+            const target = valid || sessionStorage.getItem('settingsReturnTo') || 'index.html';
+            document.getElementById('backLink').href = target;
+        })();
     </script>
 </body>
 </html>
