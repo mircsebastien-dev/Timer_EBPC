@@ -54,8 +54,9 @@
   #halfA::before { background: radial-gradient(80% 60% at 20% 20%, rgba(225,10,25,.30), transparent 70%); }
   #halfB::before { background: radial-gradient(80% 60% at 80% 20%, rgba(25,100,175,.30), transparent 70%); }
   .half.active::before { opacity: 1; }
-  .half:not(.active) { filter: saturate(.25) brightness(.55); }
-  .half:not(.active) .extwrap { filter: none; }   /* pastilles d'extension toujours nettes */
+  /* Atténuation ciblée : seulement la lettre de l'équipe inactive, jamais la pastille */
+  .half:not(.active) .teamname { filter: saturate(.25) brightness(.55); }
+  .half:not(.active)::before { opacity: .25; }
   .half .teamname {
     position: absolute; top: 4%; left: 50%; transform: translateX(-50%);
     font-size: min(22vw, 20vh); font-weight: 900; letter-spacing: 0;
