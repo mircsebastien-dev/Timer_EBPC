@@ -561,7 +561,8 @@ function addExtension(team) {
   if (extUsed[team]) { toast('Extension déjà utilisée'); return; }
   if (extJustGranted) { toast('Une seule extension à la suite'); return; }
   if (phase === 'break' && team !== 'A') return;   // pendant la casse : équipe A
-  if (phase === 'shot' && team !== turn) return;   // seulement l'équipe au timer
+  // en phase de coup : le double-tap s'applique au côté tapé (gauche = A, droite = B),
+  // indépendamment de l'équipe sélectionnée au timer
   unlockAudio();
   extUsed[team] = true;
   extJustGranted = true;
