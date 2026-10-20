@@ -341,10 +341,29 @@ async function ensureSoundsReady() {
   await preloadAllSounds();
   return sound25sBuffer !== null && sound5sBuffer !== null;
 }
+let resumeAttempts = 0;
 function unlockAudio() {
+  // iOS : un contexte suspendu qui ne reprend pas est « mort » — le recréer PENDANT ce geste utilisateur
+  if (audioContext && audioContext.state !== 'running' && audioUnlocked && resumeAttempts >= 1) {
+    try { audioContext.close(); } catch (e) {}
+    audioContext = null;
+    sound25sBuffer = null;
+    sound5sBuffer = null;
+    currentSource = null;
+    countdownSource = null;
+    countdownPlaying = false;
+    countdownOffset = 0;
+    audioUnlocked = false;
+    resumeAttempts = 0;
+  }
   initAudio();
   if (audioContext) {
-    if (audioContext.state === 'suspended') audioContext.resume();
+    if (audioContext.state === 'suspended') {
+      resumeAttempts++;
+      audioContext.resume().then(() => {
+        if (audioContext.state === 'running') resumeAttempts = 0;
+      }).catch(() => {});
+    }
     if (!audioUnlocked) {
       try {
         // iOS : un buffer de silence réel (et non un oscillateur à gain 0) débloque l'audio
@@ -534,6 +553,7 @@ function startBreak() {
   if (breakUsed) return;
   breakUsed = true;
   unlockAudio();
+  ensureSoundsReady();   // décoder les sons pendant le geste, avant que le timer ne les réclame
   phase = 'break'; turn = 'A'; isPaused = false;
   timeRemaining = totalTime = S.breakTime;
   warningPlayed = false; countdownPlayed = false; extJustGranted = false;
@@ -543,6 +563,7 @@ function startBreak() {
 function handOver() {
   if (phase === 'idle') return;
   unlockAudio();
+  ensureSoundsReady();   // décoder les sons pendant le geste, avant que le timer ne les réclame
   // Le compteur repart pour l'équipe sélectionnée (turn) — pas de bascule automatique A/B
   phase = 'shot';
   timeRemaining = totalTime = S.shotTime;
@@ -671,9 +692,11 @@ function arenaTapped(e) {
 }
 document.getElementById('arena').addEventListener('click', arenaTapped);
 
-// iOS : déverrouiller l'audio au premier toucher n'importe où sur la page
-document.body.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
-document.body.addEventListener('click', unlockAudio, { once: true });
+// iOS : déverrouiller l'audio à CHAQUE toucher — un contexte suspendu (arrière-plan,
+// verrouillage) ne peut être repris/recréé que pendant un geste utilisateur
+// (comme le fait le bouton de test de settings.html)
+document.body.addEventListener('touchstart', unlockAudio, { passive: true });
+document.body.addEventListener('click', unlockAudio);
 
 // iOS/Android : après un passage en arrière-plan ou un verrouillage, le contexte audio
 // est suspendu — le reprendre dès le retour au premier plan pour ne pas rater les bips
