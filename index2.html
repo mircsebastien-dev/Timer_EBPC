@@ -365,6 +365,13 @@ function unlockAudio() {
 let currentSource = null;
 function playBuffer(buffer) {
   if (!audioContext || !buffer) return;
+  // si le contexte est suspendu, attendre la reprise AVANT de jouer (resume() est asynchrone)
+  if (audioContext.state !== 'running') {
+    audioContext.resume().then(() => {
+      if (audioContext.state === 'running') playBuffer(buffer);
+    }).catch(() => {});
+    return;
+  }
   stopCurrentSound();
   const source = audioContext.createBufferSource();
   const gainNode = audioContext.createGain();
@@ -394,6 +401,13 @@ function playCountdownBeep() {
   startCountdownSound();
 }
 function startCountdownSound() {
+  // si le contexte est suspendu, attendre la reprise AVANT de jouer (resume() est asynchrone)
+  if (audioContext.state !== 'running') {
+    audioContext.resume().then(() => {
+      if (audioContext.state === 'running' && !countdownPlaying) startCountdownSound();
+    }).catch(() => {});
+    return;
+  }
   const source = audioContext.createBufferSource();
   const gainNode = audioContext.createGain();
   source.buffer = sound5sBuffer;
@@ -660,6 +674,25 @@ document.getElementById('arena').addEventListener('click', arenaTapped);
 // iOS : déverrouiller l'audio au premier toucher n'importe où sur la page
 document.body.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
 document.body.addEventListener('click', unlockAudio, { once: true });
+
+// iOS/Android : après un passage en arrière-plan ou un verrouillage, le contexte audio
+// est suspendu — le reprendre dès le retour au premier plan pour ne pas rater les bips
+function resumeAudioOnForeground() {
+  const visible = document.visibilityState === 'visible';
+  const focused = document.hasFocus();
+  if ((visible || focused) && audioContext && audioContext.state === 'suspended') {
+    audioContext.resume().catch(() => {});
+  }
+  if (visible || focused) {
+    if (isPaused === false && (phase === 'break' || phase === 'shot') && countdownPlaying === false
+        && timeRemaining <= S.countdownStart && timeRemaining > 0) {
+      resumeCountdownSound();
+    }
+  }
+}
+document.addEventListener('visibilitychange', resumeAudioOnForeground);
+window.addEventListener('focus', resumeAudioOnForeground);
+document.addEventListener('pageshow', resumeAudioOnForeground);
 
 // Noms d'équipes persistés (settings.html peut les définir)
 try {
