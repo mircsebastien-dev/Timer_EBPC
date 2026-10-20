@@ -139,7 +139,6 @@
   .dockbtn:active { transform: scale(.93); }
   .dockbtn:disabled { opacity: .3; }
   #btnBreak { background: linear-gradient(135deg, #1964af, #e10a19); border: none; }
-  #btnPause { background: linear-gradient(135deg, #1964af, #134b83); border: none; }
 
   #settingsLink {
     position: absolute; top: 10px; right: 12px; z-index: 5;
@@ -217,7 +216,6 @@
 <div id="dock">
   <button class="dockbtn" id="btnBreak">⚡ Casse</button>
   <button class="dockbtn" id="btnHand">Nouveau coup ⏭</button>
-  <button class="dockbtn" id="btnPause">⏸ Pause</button>
 </div>
 
 <script>
@@ -484,7 +482,6 @@ function updateDisplay() {
   document.getElementById('extDotB').classList.toggle('used', extUsed.B);
 
   document.getElementById('btnBreak').disabled = breakUsed || phase === 'break' || phase === 'paused';
-  document.getElementById('btnPause').disabled = phase === 'idle' || phase === 'over';
   document.getElementById('btnHand').disabled = phase === 'idle';
   updateSoundStatus();
 }
@@ -582,7 +579,6 @@ function togglePause() {
   if (phase === 'idle' || phase === 'over') return;
   unlockAudio();
   isPaused = !isPaused;
-  document.getElementById('btnPause').textContent = isPaused ? '▶ Reprendre' : '⏸ Pause';
   if (isPaused) pauseCountdownSound();
   else resumeCountdownSound();
   toast(isPaused ? '⏸ Pause' : '▶ Reprise');
@@ -598,14 +594,12 @@ function resetAll() {
   extUsed = { A: false, B: false };
   extJustGranted = false;
   warningPlayed = false; countdownPlayed = false;
-  document.getElementById('btnPause').textContent = '⏸ Pause';
   updateDisplay();
 }
 
 // ===== Interactions =====
 document.getElementById('btnBreak').addEventListener('click', startBreak);
 document.getElementById('btnHand').addEventListener('click', handOver);
-document.getElementById('btnPause').addEventListener('click', togglePause);
 document.getElementById('btnReset').addEventListener('click', resetAll);
 
 // UX : double-tap sur sa moitié = demander l'extension de SON équipe
@@ -639,8 +633,7 @@ function arenaTapped(e) {
     // double-tap : annule le tap simple en attente et donne l'extension
     clearTimeout(singleTapTimer); singleTapTimer = null;
     lastTap = { zone: '', time: 0 };
-    if (inDial) addExtension(isBreakTime() ? 'A' : turn);
-    else addExtension(zone);
+    if (!inDial) addExtension(zone);   // extension uniquement via les lettres A et B
     return;
   }
 
@@ -662,7 +655,6 @@ function arenaTapped(e) {
   }, DOUBLE_TAP_MS);
 }
 document.getElementById('arena').addEventListener('click', arenaTapped);
-function isBreakTime() { return phase === 'break'; }
 
 // iOS : déverrouiller l'audio au premier toucher n'importe où sur la page
 document.body.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
