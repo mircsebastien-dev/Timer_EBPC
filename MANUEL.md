@@ -4,15 +4,14 @@
 
 Timer Blackball est un chronomètre de compétition pour le billard Blackball, conçu pour un usage sur smartphone : tout tient sur un seul écran, en portrait comme en paysage.
 
-L'écran est divisé en deux moitiés — **équipe A** à gauche (rouge), **équipe B** à droite (bleu) — avec au centre un **cercle** affichant le décompte. L'équipe active au timer est mise en avant visuellement.
+L'écran est divisé en deux moitiés — **joueur A** à gauche (rouge), **joueur B** à droite (bleu) — avec au centre un **cercle** affichant le décompte. Le joueur actif au timer est mis en avant visuellement.
 
 ## Démarrage rapide
 
-1. Ouvrir la page (index2.html) sur le téléphone.
-2. Toucher une fois l'écran pour activer le son (icône 🔊 en haut à droite).
-3. Lancer la casse : **toucher le cercle** (ou bouton « ⚡ Casse »).
-4. À chaque coup joué : **double-tap sur le cercle** (ou bouton « Nouveau coup ⏭ »).
-5. L'équipe ou le joueur peut demander une extension **à tout moment pendant son tour** : **double-tap sur sa moitié**.
+1. Ouvrir la page sur le téléphone.
+2. Lancer la casse : **toucher le cercle** (ou bouton « ⚡ Casse »).
+3. À chaque coup joué : **double-tap sur le cercle** (ou bouton « Nouveau coup ⏭ »).
+4. Le joueur peut demander une extension **à tout moment pendant son tour** : **double-tap sur sa moitié**.
 
 ## Les gestes
 
@@ -45,7 +44,7 @@ Notes :
 
 ## Les extensions
 
-- Chaque équipe dispose d'**une seule extension de 30 s par partie** (par reset).
+- Chaque joueur dispose d'**une seule extension de 30 s par partie** (par reset).
 - Elle s'accorde par **double-tap sur la moitié de l'équipe** : la moitié gauche pour A, la droite pour B — indépendamment de l'équipe actuellement active au timer.
 - Le double-tap **sélectionne aussi cette équipe** au timer.
 - Une fois utilisée, la pastille ronde en bas de la moitié devient rouge.
