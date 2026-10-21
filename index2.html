@@ -671,14 +671,8 @@ function arenaTapped(e) {
   lastTap = { zone, time: now, count };
   clearTimeout(singleTapTimer);
 
-  if (count === 2) {
-    // double-tap : annule le tap simple en attente et donne l'extension
-    if (!inDial) addExtension(zone);   // extension uniquement via les lettres A et B
-    return;
-  }
-
   if (count >= 3) {
-    // triple-tap : nouveau coup (relance le compteur 45 s pour le côté tapé)
+    // triple-tap : annule l'extension en attente et fait le nouveau coup
     lastTap = { zone: '', time: 0, count: 0 };
     if (!inDial && phase !== 'break' && phase !== 'idle') {
       if (phase !== 'over') turn = zone;   // le triple-tap sélectionne aussi l'équipe tapée
@@ -687,18 +681,26 @@ function arenaTapped(e) {
     return;
   }
 
-  // tap simple différé pour laisser la place à un éventuel double/triple-tap
+  // tap simple et double-tap différés : laisser la fenêtre ouverte à un éventuel
+  // double (extension) ou triple (nouveau coup)
   singleTapTimer = setTimeout(() => {
     singleTapTimer = null;
+    const taps = lastTap.count;
+    const z = lastTap.zone;
     lastTap = { zone: '', time: 0, count: 0 };
-    if (inDial) {
-      // dans le cercle : lancement / pause / reprise / relance
-      if (phase === 'idle') startBreak();
-      else if (phase === 'over') handOver();
-      else togglePause();
+    if (taps === 2) {
+      // double-tap : extension uniquement via les lettres A et B
+      if (z !== 'dial') addExtension(z);
     } else {
-      // sur une moitié : sélection de l'équipe
-      selectTeam(zone);
+      if (inDial) {
+        // dans le cercle : lancement / pause / reprise / relance
+        if (phase === 'idle') startBreak();
+        else if (phase === 'over') handOver();
+        else togglePause();
+      } else {
+        // sur une moitié : sélection de l'équipe
+        selectTeam(z);
+      }
     }
   }, DOUBLE_TAP_MS);
 }
