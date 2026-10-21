@@ -226,12 +226,12 @@ function loadSessionSettings() {
     return {
       shotTime: s.shotTime != null ? s.shotTime : 45,
       breakTime: s.breakTime != null ? s.breakTime : 90,
-      warningTime: s.warningTime != null ? s.warningTime : 25,
+      warningTime: s.warningTime != null ? s.warningTime : 20,
       extensionTime: s.extensionTime != null ? s.extensionTime : 30,
       countdownStart: s.countdownStart != null ? s.countdownStart : 5
     };
   } catch (e) {
-    return { shotTime: 45, breakTime: 90, warningTime: 25, extensionTime: 30, countdownStart: 5 };
+    return { shotTime: 45, breakTime: 90, warningTime: 20, extensionTime: 30, countdownStart: 5 };
   }
 }
 const S = loadSessionSettings();

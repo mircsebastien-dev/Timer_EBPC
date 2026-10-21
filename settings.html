@@ -218,11 +218,11 @@
         <div class="setting-group">
             <div class="setting-label">
                 <span>🔔 Bip d'avertissement à</span>
-                <span class="value-tag" id="warningValue">25 s</span>
+                <span class="value-tag" id="warningValue">20 s</span>
             </div>
             <div class="slider-row">
                 <span>15s</span>
-                <input type="range" id="warningTime" min="15" max="25" step="1" value="25">
+                <input type="range" id="warningTime" min="15" max="25" step="1" value="20">
                 <span>25s</span>
             </div>
         </div>
@@ -230,7 +230,7 @@
 
     <div class="controls">
         <div class="control-row">
-            <button class="btn-test-warn" onclick="testSound('25s')">🔊 Test bip 25s</button>
+            <button class="btn-test-warn" onclick="testSound('25s')">🔊 Test bip d'avertissement</button>
             <button class="btn-test" onclick="testSound('5s')">🔊 Test compte à rebours</button>
         </div>
         <div class="control-row">
@@ -398,7 +398,7 @@
         function resetSettings() {
             document.getElementById('shotTime').value = 45;
             document.getElementById('breakTime').value = 90;
-            document.getElementById('warningTime').value = 25;
+            document.getElementById('warningTime').value = 20;
             document.getElementById('extensionTime').value = 30;
             updateLabels();
             sessionStorage.removeItem('timerSettings');

@@ -12,13 +12,13 @@ L'écran est divisé en deux moitiés — **équipe A** à gauche (rouge), **éq
 2. Toucher une fois l'écran pour activer le son (icône 🔊 en haut à droite).
 3. Lancer la casse : **toucher le cercle** (ou bouton « ⚡ Casse »).
 4. À chaque coup joué : **double-tap sur le cercle** (ou bouton « Nouveau coup ⏭ »).
-5. En cas de faute de temps, l'équipe peut demander une extension : **double-tap sur sa moitié**.
+5. L'équipe ou le joueur peut demander une extension **à tout moment pendant son tour** : **double-tap sur sa moitié**.
 
 ## Les gestes
 
 | Zone | Tap simple | Double tap | Triple tap |
 |---|---|---|---|
-| **Cercle central** | Lancer la casse (avant partie) / **Pause** / Reprendre / Relancer après temps écoulé | **Nouveau coup** (45 s) | — |
+| **Cercle central** | Lancer la casse (avant partie) / **Pause** / Reprendre / Nouveau coup après temps écoulé | **Nouveau coup** (45 s) | — |
 | **Moitié A (gauche)** | Sélectionner A comme équipe active | **Extension 30 s pour A** (+ A devient actif) | **Nouveau coup pour A** |
 | **Moitié B (droite)** | Sélectionner B comme équipe active | **Extension 30 s pour B** (+ B devient actif) | **Nouveau coup pour B** |
 
@@ -37,8 +37,9 @@ Notes :
 
 ## Les sons
 
-- **Bip d'avertissement** à 25 s restantes (double bip).
+- **Bip d'avertissement** à 20 s restantes (double bip) — valeur par défaut, réglable de 15 à 25 s dans les paramètres.
 - **Compte à rebours final** à 5 s : bips 5-4-3-2-1 puis **buzzer** à 0.
+- Les temps indiqués dans cette section sont les valeurs par défaut ; les valeurs réelles sont celles configurées dans les paramètres.
 - L'icône en haut à droite indique l'état du son : 🔇 (pas encore déverrouillé — toucher l'écran), ⏳ (sons en cours de chargement), 🔊 (prêt).
 - Astuce : si aucun son ne sort après avoir misé l'écran ou changé d'application, **toucher une fois l'écran** — le son se réactive automatiquement au toucher.
 
@@ -64,7 +65,7 @@ Accessibles via l'icône ⚙️. Les valeurs sont ajustables par curseurs, avec 
 | Temps par coup | 30–45 s | 45 s |
 | Temps de casse | 45–90 s | 90 s (1:30) |
 | Extension | 10–60 s | 30 s |
-| Bip d'avertissement | 15–25 s | 25 s |
+| Bip d'avertissement | 15–25 s | 20 s |
 
 ⚠️ Les paramètres sont stockés pour la **session** en cours : fermer complètement l'onglet ou le navigateur les réinitialise aux valeurs par défaut. Le bouton de test (🔊 Test bip) permet de vérifier le son avant la partie.
 
