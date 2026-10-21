@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manuel utilisateur — Timer Blackball (Timer_EBPC)</title>
+<style>
+  :root {
+    --red: #d64541;
+    --blue: #2f6fd8;
+    --ink: #1f2933;
+    --muted: #5b6b7a;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --line: #e3e8ef;
+    --accent: #0f766e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+  header.cover {
+    background: linear-gradient(135deg, #14213d 0%, #1d3557 60%, #2f6fd8 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 48px 40px;
+    margin-bottom: 36px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(20,33,61,.25);
+  }
+  header.cover .kicker {
+    text-transform: uppercase;
+    letter-spacing: .25em;
+    font-size: .8rem;
+    opacity: .85;
+  }
+  header.cover h1 {
+    margin: 12px 0 8px;
+    font-size: 2.4rem;
+    letter-spacing: .02em;
+  }
+  header.cover .subtitle {
+    font-size: 1.1rem;
+    opacity: .9;
+  }
+  header.cover .badges {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .badge {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: .85rem;
+  }
+  .badge .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .dot.red { background: var(--red); }
+  .dot.blue { background: #5aa2ff; }
+  h2 {
+    font-size: 1.35rem;
+    margin: 44px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .num {
+    background: var(--accent);
+    color: #fff;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .95rem;
+    flex: none;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 26px;
+    box-shadow: 0 2px 8px rgba(31,41,51,.05);
+  }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .cols { grid-template-columns: 1fr; } .page { padding: 24px 16px 60px; } header.cover { padding: 36px 20px; } }
+  .player { border-left: 6px solid; }
+  .player.a { border-color: var(--red); }
+  .player.b { border-color: var(--blue); }
+  .player h3 { margin: 0 0 6px; font-size: 1.05rem; }
+  .player.a h3 { color: var(--red); }
+  .player.b h3 { color: var(--blue); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: .95rem;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #eef2f7; font-weight: 600; }
+  tr:nth-child(even) td { background: #fafbfd; }
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 20px 52px;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0; top: 0;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .steps li::after {
+    content: "";
+    position: absolute;
+    left: 17px; top: 40px; bottom: 4px;
+    width: 2px;
+    background: var(--line);
+  }
+  .steps li:last-child::after { display: none; }
+  .steps b { display: block; margin-bottom: 2px; }
+  kbd, .key {
+    background: #eef2f7;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    padding: 1px 8px;
+    font-size: .9em;
+    white-space: nowrap;
+  }
+  .tip {
+    background: #eefaf5;
+    border-left: 5px solid #16a34a;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: .95rem;
+  }
+  .warn {
+    background: #fdf3e7;
+    border-left: 5px solid #d97706;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: .95rem;
+  }
+  .note {
+    background: #eaf1fd;
+    border-left: 5px solid var(--blue);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: .95rem;
+  }
+  ul.tight { margin: 8px 0; padding-left: 22px; }
+  ul.tight li { margin: 6px 0; }
+  .btnrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 10px; }
+  .btnbox { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .btnbox .btnname { font-weight: 700; margin-bottom: 4px; }
+  footer {
+    margin-top: 56px;
+    text-align: center;
+    color: var(--muted);
+    font-size: .85rem;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { max-width: none; padding: 0; }
+    .card, .btnbox { box-shadow: none; }
+    header.cover { border-radius: 0; box-shadow: none; }
+    h2 { break-after: avoid; }
+    .card, .tip, .warn, .note { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="cover">
+    <div class="kicker">Manuel utilisateur</div>
+    <h1>⏱️ Timer Blackball</h1>
+    <div class="subtitle">Chronomètre de compétition pour le billard Blackball — Timer_EBPC</div>
+    <div class="badges">
+      <span class="badge"><span class="dot red"></span>Joueur A (gauche)</span>
+      <span class="badge"><span class="dot blue"></span>Joueur B (droite)</span>
+      <span class="badge">📱 Optimisé smartphone</span>
+      <span class="badge">🔄 Portrait &amp; paysage</span>
+    </div>
+  </header>
+
+  <h2><span class="num">1</span>Présentation</h2>
+  <div class="card">
+    <p>Timer Blackball est un chronomètre de compétition pour le billard Blackball, conçu pour un usage sur smartphone : tout tient sur un seul écran, en portrait comme en paysage.</p>
+    <p>L'écran est divisé en deux moitiés, avec au centre un <b>cercle</b> affichant le décompte. Le joueur actif au timer est mis en avant visuellement.</p>
+    <div class="cols" style="margin-top:14px;">
+      <div class="card player a">
+        <h3>🔴 Joueur A — moitié gauche</h3>
+        <p style="margin:0;">C'est toujours le joueur A qui casse.</p>
+      </div>
+      <div class="card player b">
+        <h3>🔵 Joueur B — moitié droite</h3>
+        <p style="margin:0;">Sélectionnable d'un simple tap sur sa moitié.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="num">2</span>Démarrage rapide</h2>
+  <div class="card">
+    <ol class="steps">
+      <li><b>Ouvrir la page sur le téléphone.</b></li>
+      <li><b>Lancer la casse.</b> Toucher le cercle central (ou le bouton « ⚡ Casse »).</li>
+      <li><b>À chaque coup joué.</b> Double-tap sur le cercle (ou le bouton « Nouveau coup ⏭ »).</li>
+      <li><b>Extension.</b> Le joueur peut demander une extension à tout moment pendant son tour : double-tap sur sa moitié.</li>
+    </ol>
+  </div>
+
+  <h2><span class="num">3</span>Les gestes</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Zone</th><th>Tap simple</th><th>Double tap</th><th>Triple tap</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Cercle central</b></td>
+          <td>Lancer la casse (avant partie) / <b>Pause</b> / Reprendre / Nouveau coup après temps écoulé</td>
+          <td><b>Nouveau coup</b> (45 s)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><b>Moitié A (gauche)</b></td>
+          <td>Sélectionner A comme équipe active</td>
+          <td><b>Extension 30 s pour A</b> (+ A devient actif)</td>
+          <td><b>Nouveau coup pour A</b></td>
+        </tr>
+        <tr>
+          <td><b>Moitié B (droite)</b></td>
+          <td>Sélectionner B comme équipe active</td>
+          <td><b>Extension 30 s pour B</b> (+ B devient actif)</td>
+          <td><b>Nouveau coup pour B</b></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note"><b>Notes :</b>
+      <ul class="tight">
+        <li>Le double-tap est détecté si les deux taps tombent dans la même zone et dans un délai d'environ <b>0,35 s</b>. L'action s'exécute juste après ce délai (le temps de vérifier qu'un triple-tap n'arrive pas).</li>
+        <li>Le triple-tap est <b>prioritaire</b> sur le double-tap : trois taps rapides sur une moitié font un nouveau coup, sans consommer l'extension.</li>
+        <li>Pendant la casse, seule l'équipe A peut recevoir l'extension (c'est toujours A qui casse).</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2><span class="num">4</span>Les boutons</h2>
+  <div class="btnrow">
+    <div class="btnbox"><div class="btnname">⟲ Reset <small style="color:var(--muted)">(haut gauche)</small></div>
+      Remise à zéro complète : retour à l'état « Prêt », extensions restituées, casse de nouveau disponible.</div>
+    <div class="btnbox"><div class="btnname">⚡ Casse <small style="color:var(--muted)">(bas)</small></div>
+      Lance le compte à rebours de casse (1:30 par défaut). Un seul lancement par reset ; le bouton se désactive ensuite.</div>
+    <div class="btnbox"><div class="btnname">Nouveau coup ⏭ <small style="color:var(--muted)">(bas)</small></div>
+      Relance le compteur de coup (45 s par défaut) pour l'équipe sélectionnée. Utilisable dès qu'une partie est lancée, y compris après un temps écoulé.</div>
+    <div class="btnbox"><div class="btnname">⛶ <small style="color:var(--muted)">(haut droite)</small></div>
+      Bascule le plein écran. Sur iPhone, si le plein écran n'est pas supporté, ajouter la page à l'écran d'accueil pour un affichage sans barre d'URL.</div>
+    <div class="btnbox"><div class="btnname">⚙️ <small style="color:var(--muted)">(haut droite)</small></div>
+      Ouvre les paramètres.</div>
+  </div>
+
+  <h2><span class="num">5</span>Les sons</h2>
+  <div class="card">
+    <ul class="tight">
+      <li><b>Bip d'avertissement</b> à 20 s restantes (double bip) — valeur par défaut, réglable de 15 à 25 s dans les paramètres.</li>
+      <li><b>Compte à rebours final</b> à 5 s : bips 5-4-3-2-1 puis <b>buzzer</b> à 0.</li>
+      <li>Les temps indiqués sont les valeurs par défaut ; les valeurs réelles sont celles configurées dans les paramètres.</li>
+      <li>L'icône en haut à droite indique l'état du son : 🔇 (pas encore déverrouillé — toucher l'écran), ⏳ (sons en cours de chargement), 🔊 (prêt).</li>
+    </ul>
+    <div class="tip">💡 <b>Astuce :</b> si aucun son ne sort après avoir misé l'écran ou changé d'application, <b>toucher une fois l'écran</b> — le son se réactive automatiquement au toucher.</div>
+  </div>
+
+  <h2><span class="num">6</span>Les extensions</h2>
+  <div class="card">
+    <ul class="tight">
+      <li>Chaque joueur dispose d'<b>une seule extension de 30 s par partie</b> (par reset).</li>
+      <li>Elle s'accorde par <b>double-tap sur la moitié de l'équipe</b> : la moitié gauche pour A, la droite pour B — indépendamment de l'équipe actuellement active au timer.</li>
+      <li>Le double-tap <b>sélectionne aussi cette équipe</b> au timer.</li>
+      <li>Une fois utilisée, la pastille ronde en bas de la moitié devient rouge.</li>
+      <li>Impossible d'accorder deux extensions à la suite sans nouveau coup entre-temps.</li>
+    </ul>
+  </div>
+
+  <h2><span class="num">7</span>Écran et consommation</h2>
+  <div class="card">
+    <ul class="tight">
+      <li>L'écran reste allumé pendant qu'un chrono tourne (WakeLock) ; la reprise de veille est automatique au retour au premier plan.</li>
+      <li>Le site fonctionne en portrait et en paysage (la disposition s'adapte).</li>
+    </ul>
+  </div>
+
+  <h2><span class="num">8</span>Paramètres (⚙️)</h2>
+  <div class="card">
+    <p>Accessibles via l'icône ⚙️. Les valeurs sont ajustables par curseurs, avec boutons de test sonore :</p>
+    <table>
+      <thead><tr><th>Paramètre</th><th>Plage</th><th>Défaut</th></tr></thead>
+      <tbody>
+        <tr><td>Temps par coup</td><td>30–45 s</td><td>45 s</td></tr>
+        <tr><td>Temps de casse</td><td>45–90 s</td><td>90 s (1:30)</td></tr>
+        <tr><td>Extension</td><td>10–60 s</td><td>30 s</td></tr>
+        <tr><td>Bip d'avertissement</td><td>15–25 s</td><td>20 s</td></tr>
+      </tbody>
+    </table>
+    <div class="warn">⚠️ <b>Attention :</b> les paramètres sont stockés pour la <b>session</b> en cours : fermer complètement l'onglet ou le navigateur les réinitialise aux valeurs par défaut. Le bouton de test (🔊 Test bip) permet de vérifier le son avant la partie.</div>
+  </div>
+
+  <h2><span class="num">9</span>Déroulé type d'une partie</h2>
+  <div class="card">
+    <ol class="steps">
+      <li><b>Avant la casse — « Prêt ».</b> Toucher le cercle (ou ⚡ Casse) → compte à rebours de casse 1:30 pour A.</li>
+      <li><b>Pendant la casse.</b> La moitié A est active. Quand un joueur joue, double-tap cercle → nouveau coup 45 s.</li>
+      <li><b>Coup joué.</b> Tap simple sur la moitié du joueur qui prend le trait → l'équipe devient active. Le compteur 45 s tourne.</li>
+      <li><b>Chaque coup joué.</b> Double-tap cercle (ou ⏭) pour relancer 45 s. Le compteur repart pour l'équipe active.</li>
+      <li><b>Extension.</b> Double-tap sur la moitié de l'équipe → +30 s, l'équipe devient active, pastille rouge allumée.</li>
+      <li><b>Temps écoulé.</b> Buzzer, « Temps écoulé » s'affiche. Double-tap cercle (ou ⏭) pour relancer un coup.</li>
+      <li><b>Fin de partie.</b> Bouton ⟲ Reset pour tout remettre à zéro (nouvelle partie, extensions restituées).</li>
+    </ol>
+  </div>
+
+  <footer>Timer_EBPC — Manuel utilisateur · Reproduit depuis MANUEL.md du dépôt GitHub</footer>
+</div>
+</body>
+</html>
