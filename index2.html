@@ -25,6 +25,8 @@
     padding-top: max(10px, env(safe-area-inset-top));
   }
   #topbar .side { width: clamp(88px, 22vw, 132px); }
+  #topbar .topleft { width: clamp(88px, 22vw, 132px); display: flex; align-items: center; gap: 10px; }
+  #topbar .topleft .resetbtn { flex: 1; width: auto; }
   .logo {
     width: clamp(96px, 26vw, 160px); height: clamp(64px, 17vw, 106px);
     border-radius: 10px; object-fit: contain;
@@ -146,20 +148,14 @@
   }
 
   #soundStatus {
-    position: fixed; top: 13px; right: 108px; z-index: 50;
-    font-size: 15px; opacity: .9; pointer-events: none;
-    line-height: 20px;
+    font-size: 17px; opacity: .75; pointer-events: none;
+    line-height: 20px; flex: none;
   }
-  #fullscreenBtn {
-    position: fixed; top: 8px; right: 76px; z-index: 50;
-    font-size: 15px; text-decoration: none; opacity: .5;
-    line-height: 20px; cursor: pointer;
-  }
-  #fullscreenBtn:active { opacity: 1; }
   #helpLink {
-    position: fixed; top: 8px; right: 44px; z-index: 50;
-    font-size: 15px; text-decoration: none; opacity: .5;
+    position: fixed; top: 8px; right: 76px; z-index: 50;
+    font-size: 16px; text-decoration: none; color: #ffb020; opacity: .85;
     line-height: 20px; cursor: pointer;
+    text-shadow: 0 0 8px rgba(255,176,32,.35);
   }
   #helpLink:active { opacity: 1; }
 
@@ -176,13 +172,14 @@
 <body>
 
 <a href="settings.html?from=index2" id="settingsLink" title="Paramètres">⚙️</a>
-<div id="soundStatus">🔊</div>
-<a id="fullscreenBtn" title="Plein écran">⛶</a>
 <a href="docs/manuel.html" id="helpLink" title="Aide — Manuel utilisateur">❓</a>
 <div id="toast"></div>
 
 <div id="topbar">
-  <button class="resetbtn" id="btnReset">⟲ Reset</button>
+  <div class="topleft">
+    <button class="resetbtn" id="btnReset">⟲ Reset</button>
+    <div id="soundStatus">🔊</div>
+  </div>
   <img src="logo.jpg" alt="Logo" class="logo">
   <div class="side"></div>
 </div>
@@ -749,30 +746,6 @@ try {
   if (n.A) document.getElementById('nameA').textContent = n.A;
   if (n.B) document.getElementById('nameB').textContent = n.B;
 } catch (e) {}
-
-// ===== Plein écran =====
-function toggleFullscreen() {
-  const d = document;
-  const el = d.documentElement;
-  if (!d.fullscreenElement && !d.webkitFullscreenElement) {
-    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else { toast('Plein écran non supporté — ajoute à l\'écran d\'accueil'); return; }
-  } else {
-    if (d.exitFullscreen) d.exitFullscreen().catch(() => {});
-    else if (d.webkitExitFullscreen) d.webkitExitFullscreen();
-  }
-}
-document.getElementById('fullscreenBtn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  toggleFullscreen();
-});
-document.addEventListener('fullscreenchange', updateFullscreenIcon);
-document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
-function updateFullscreenIcon() {
-  const on = document.fullscreenElement || document.webkitFullscreenElement;
-  document.getElementById('fullscreenBtn').textContent = on ? '⤡' : '⛶';
-}
 
 updateDisplay();
 </script>
