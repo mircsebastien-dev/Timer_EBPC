@@ -146,16 +146,22 @@
   }
 
   #soundStatus {
-    position: fixed; top: 13px; right: 76px; z-index: 50;
+    position: fixed; top: 13px; right: 108px; z-index: 50;
     font-size: 15px; opacity: .9; pointer-events: none;
     line-height: 20px;
   }
   #fullscreenBtn {
-    position: fixed; top: 8px; right: 44px; z-index: 50;
+    position: fixed; top: 8px; right: 76px; z-index: 50;
     font-size: 15px; text-decoration: none; opacity: .5;
     line-height: 20px; cursor: pointer;
   }
   #fullscreenBtn:active { opacity: 1; }
+  #helpLink {
+    position: fixed; top: 8px; right: 44px; z-index: 50;
+    font-size: 15px; text-decoration: none; opacity: .5;
+    line-height: 20px; cursor: pointer;
+  }
+  #helpLink:active { opacity: 1; }
 
   #toast {
     position: absolute; left: 50%; top: 16%; transform: translateX(-50%) translateY(-8px);
@@ -172,6 +178,7 @@
 <a href="settings.html?from=index2" id="settingsLink" title="Paramètres">⚙️</a>
 <div id="soundStatus">🔊</div>
 <a id="fullscreenBtn" title="Plein écran">⛶</a>
+<a href="docs/manuel.html" id="helpLink" title="Aide — Manuel utilisateur">❓</a>
 <div id="toast"></div>
 
 <div id="topbar">
