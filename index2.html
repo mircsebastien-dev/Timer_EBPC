@@ -634,8 +634,13 @@ function togglePause() {
   if (phase === 'idle' || phase === 'over') return;
   unlockAudio();
   isPaused = !isPaused;
-  if (isPaused) pauseCountdownSound();
-  else resumeCountdownSound();
+  if (isPaused) {
+    pauseCountdownSound();
+    stopTimer();
+  } else {
+    resumeCountdownSound();
+    if (!timer) startInterval();
+  }
   toast(isPaused ? '⏸ Pause' : '▶ Reprise');
   updateDisplay();
 }
@@ -770,6 +775,12 @@ function checkOrientation() {
   if (landscape) {
     stopTimer();
     isPaused = true;
+  } else if (isPaused && (phase === 'break' || phase === 'shot')) {
+    // retour en portrait : reprendre automatiquement là où on en était
+    isPaused = false;
+    resumeCountdownSound();
+    startInterval();
+    updateDisplay();
   }
 }
 checkOrientation();
