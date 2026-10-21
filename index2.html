@@ -657,7 +657,7 @@ function tapInDial(x, y) {
   return dx * dx + dy * dy <= radius * radius;
 }
 
-let lastTap = { zone: '', time: 0 };
+let lastTap = { zone: '', time: 0, count: 0 };
 let singleTapTimer = null;
 
 function arenaTapped(e) {
@@ -665,22 +665,32 @@ function arenaTapped(e) {
   const inDial = tapInDial(e.clientX, e.clientY);
   const zone = inDial ? 'dial' : (e.clientX < window.innerWidth / 2 ? 'A' : 'B');
   const now = Date.now();
-  const isDouble = zone === lastTap.zone && (now - lastTap.time) < DOUBLE_TAP_MS;
+  const sameZone = zone === lastTap.zone && (now - lastTap.time) < DOUBLE_TAP_MS;
+  const count = sameZone ? lastTap.count + 1 : 1;
 
-  if (isDouble) {
+  lastTap = { zone, time: now, count };
+  clearTimeout(singleTapTimer);
+
+  if (count === 2) {
     // double-tap : annule le tap simple en attente et donne l'extension
-    clearTimeout(singleTapTimer); singleTapTimer = null;
-    lastTap = { zone: '', time: 0 };
     if (!inDial) addExtension(zone);   // extension uniquement via les lettres A et B
     return;
   }
 
-  lastTap = { zone, time: now };
-  // tap simple différé pour laisser la place à un éventuel double-tap
-  clearTimeout(singleTapTimer);
+  if (count >= 3) {
+    // triple-tap : nouveau coup (relance le compteur 45 s pour le côté tapé)
+    lastTap = { zone: '', time: 0, count: 0 };
+    if (!inDial && phase !== 'break' && phase !== 'idle') {
+      if (phase !== 'over') turn = zone;   // le triple-tap sélectionne aussi l'équipe tapée
+      handOver();
+    }
+    return;
+  }
+
+  // tap simple différé pour laisser la place à un éventuel double/triple-tap
   singleTapTimer = setTimeout(() => {
     singleTapTimer = null;
-    lastTap = { zone: '', time: 0 };
+    lastTap = { zone: '', time: 0, count: 0 };
     if (inDial) {
       // dans le cercle : lancement / pause / reprise / relance
       if (phase === 'idle') startBreak();
