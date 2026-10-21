@@ -599,6 +599,8 @@ function addExtension(team) {
   // en phase de coup : le double-tap s'applique au côté tapé (gauche = A, droite = B),
   // indépendamment de l'équipe sélectionnée au timer
   unlockAudio();
+  // le double-tap rend aussi l'équipe du côté tapé active au timer
+  if (phase === 'shot' && turn !== team) turn = team;
   extUsed[team] = true;
   extJustGranted = true;
   timeRemaining += S.extensionTime;
