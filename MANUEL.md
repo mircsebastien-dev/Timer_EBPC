@@ -2,7 +2,7 @@
 
 ## Présentation
 
-Timer Blackball est un chronomètre de compétition pour le billard Blackball, conçu pour un usage sur smartphone : tout tient sur un seul écran, en portrait comme en paysage.
+Timer Blackball est un chronomètre de compétition pour le billard Blackball, conçu pour un usage sur smartphone : tout tient sur un seul écran. L'application s'utilise **en portrait uniquement** — en paysage, un écran « Tournez votre téléphone » s'affiche et le chrono est mis en pause.
 
 L'écran est divisé en deux moitiés — **joueur A** à gauche (rouge), **joueur B** à droite (bleu) — avec au centre un **cercle** affichant le décompte. Le joueur actif au timer est mis en avant visuellement.
 
@@ -11,7 +11,8 @@ L'écran est divisé en deux moitiés — **joueur A** à gauche (rouge), **joue
 1. Ouvrir la page sur le téléphone.
 2. Lancer la casse : **toucher le cercle** (ou bouton « ⚡ Casse »).
 3. À chaque coup joué : **double-tap sur le cercle** (ou bouton « Nouveau coup ⏭ »).
-4. Le joueur peut demander une extension **à tout moment pendant son tour** : **double-tap sur sa moitié**.
+4. **Pause / Reprise** : **tap simple sur le cercle** pour mettre le chrono en pause ⏸ ; un nouveau tap reprend le décompte ▶.
+5. Le joueur peut demander une extension **à tout moment pendant son tour** : **double-tap sur sa moitié**.
 
 ## Les gestes
 
@@ -31,7 +32,6 @@ Notes :
 - **⟲ Reset** (en haut à gauche) : remise à zéro complète — retour à l'état « Prêt », extensions restituées, casse de nouveau disponible.
 - **⚡ Casse** (en bas) : lance le compte à rebours de casse (1:30 par défaut). Un seul lancement de casse par reset ; le bouton se désactive ensuite.
 - **Nouveau coup ⏭** (en bas) : relance le compteur de coup (45 s par défaut) pour l'équipe sélectionnée. Utilisable dès qu'une partie est lancée, y compris après un temps écoulé.
-- **⛶** (en haut à droite) : bascule le plein écran. Sur iPhone, si le plein écran n'est pas supporté, ajouter la page à l'écran d'accueil pour un affichage sans barre d'URL.
 - **⚙️** (en haut à droite) : paramètres.
 
 ## Les sons
@@ -53,7 +53,7 @@ Notes :
 ## Écran et consommation
 
 - L'écran reste allumé pendant qu'un chrono tourne (WakeLock) ; la reprise de veille est automatique au retour au premier plan.
-- Le site fonctionne en portrait et en paysage (la disposition s'adapte).
+- L'application s'utilise en portrait uniquement : en paysage, un écran « Tournez votre téléphone » s'affiche, le chrono est mis en pause et reprend automatiquement au retour en portrait.
 
 ## Paramètres (⚙️)
 
