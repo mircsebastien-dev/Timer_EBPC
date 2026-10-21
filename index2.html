@@ -689,8 +689,13 @@ function arenaTapped(e) {
     const z = lastTap.zone;
     lastTap = { zone: '', time: 0, count: 0 };
     if (taps === 2) {
-      // double-tap : extension uniquement via les lettres A et B
-      if (z !== 'dial') addExtension(z);
+      // double-tap : extension via les lettres A et B, nouveau coup via le cercle
+      if (z === 'dial') {
+        if (phase === 'idle') startBreak();
+        else handOver();
+      } else {
+        addExtension(z);
+      }
     } else {
       if (inDial) {
         // dans le cercle : lancement / pause / reprise / relance
